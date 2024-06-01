@@ -15,10 +15,9 @@ from ..engine.constants import STARTING_TURN
 ItemsDict = Dict[int, None | Item[ItemType]]
 
 
-class Shop(Generic[ItemType]):
+class GenericShop(Generic[ItemType]):
     def __init__(self):
         self.items: ItemsDict = {}
-        self.roll_price = DEFAULT_ROLL_PRICE
 
     def freeze(self, index: int):
         self.items[index].freeze()
@@ -50,7 +49,7 @@ PetItemsDict = Dict[int, None | PetItem]
 FoodItemsDict = Dict[int, None | FoodItem]
 
 
-class PetShop(Shop[Pet]):
+class PetShop(GenericShop[Pet]):
     def __init__(self):
         super().__init__()
         self.items: PetItemsDict = \
@@ -65,7 +64,7 @@ class PetShop(Shop[Pet]):
                 self.items[i] = PetItem(item=choice(item_pool)())
 
 
-class FoodShop(Shop[Food]):
+class FoodShop(GenericShop[Food]):
     def __init__(self):
         super().__init__()
         self.items: ItemsDict = \
@@ -79,3 +78,13 @@ class FoodShop(Shop[Food]):
             if item is None or not item.is_frozen():
                 self.items[i] = FoodItem(item=choice(item_pool)())
 
+
+class Shop:
+    def __init__(self):
+        self.roll_price: int = DEFAULT_ROLL_PRICE
+        self.pet_shop: PetShop = PetShop()
+        self.food_shop: FoodShop = FoodShop()
+
+    def refresh(self, turn: int):
+        self.pet_shop.refresh(turn)
+        self.food_shop.refresh(turn)

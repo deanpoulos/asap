@@ -8,13 +8,11 @@ def process_refresh_shop(_: ActionRefreshShop, team: Team, game):
     game: Game
 
     team_shop_state = game.team_states[team]
-    pet_shop = game.team_states[team].pet_shop
-    food_shop = game.team_states[team].food_shop
+    shop = game.team_states[team].shop
 
-    roll_price = pet_shop.roll_price
+    roll_price = shop.roll_price
     if team_shop_state.money < roll_price:
         raise NotEnoughMoneyError(team_shop_state.money, roll_price)
 
     team_shop_state.money -= roll_price
-    pet_shop.refresh(game.turn)
-    food_shop.refresh(game.turn)
+    shop.refresh(game.turn)

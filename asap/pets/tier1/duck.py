@@ -1,5 +1,5 @@
 from asap.abilities import Ability
-from asap.foods import Perk
+from asap.perks import Perk
 from asap.pets.pet import Pet
 
 

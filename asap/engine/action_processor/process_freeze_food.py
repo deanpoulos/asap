@@ -1,13 +1,13 @@
-from asap.actions import ActionFreezePet
+from asap.actions import ActionFreezeFood
 from asap.actions.errors import *
 from asap.team import Team
 
 
-def process_freeze_pet(action: ActionFreezePet, team: Team, game):
+def process_freeze_food(action: ActionFreezeFood, team: Team, game):
     from asap.engine.game import Game
     game: Game
 
-    shop = game.team_states[team].shop.pet_shop
+    shop = game.team_states[team].shop.food_shop
     item = shop.items[action.shop_index]
 
     if item.is_frozen():

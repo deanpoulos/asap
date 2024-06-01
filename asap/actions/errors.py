@@ -25,6 +25,11 @@ class PositionOccupiedError(InvalidActionError):
         super().__init__(message=f"Position {i} already occupied.")
 
 
+class PositionNotOccupiedError(InvalidActionError):
+    def __init__(self, i: int):
+        super().__init__(message=f"There is no pet in position {i}.")
+
+
 class AlreadyFrozenError(InvalidActionError):
     def __init__(self, item: Item):
         super().__init__(message=f"Item {item} is already frozen.")

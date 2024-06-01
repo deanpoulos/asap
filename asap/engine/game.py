@@ -1,11 +1,13 @@
 from typing import List, Dict
 
 from asap.actions import *
+from asap.engine.action_processor.process_buy_food import process_buy_food
 from asap.engine.action_processor.process_buy_pet import process_buy_pet
+from asap.engine.action_processor.process_freeze_food import process_freeze_food
 from asap.engine.action_processor.process_freeze_pet import process_freeze_pet
 from asap.engine.action_processor.process_refresh_shop import process_refresh_shop
 from asap.engine.constants import STARTING_TURN
-from asap.shop import PetShop
+from asap.shop import Shop
 from asap.team import Team, TeamBattleState, TeamShopState
 from asap.team.constants import MAX_TEAM_SIZE
 
@@ -15,17 +17,13 @@ class Game:
         self.turn = STARTING_TURN
         self.teams: List[Team] = teams
         self.team_states: Dict[Team, TeamShopState] = {
-            team: TeamShopState(team, PetShop()) for team in self.teams
+            team: TeamShopState(team, Shop()) for team in self.teams
         }
         for team_shop_state in self.team_states.values():
-            team_shop_state.pet_shop.refresh(self.turn)
+            team_shop_state.shop.refresh(self.turn)
 
     def battle(self, team_left: Team, team_right: Team):
-        while team_left.still_alive() and team_right.still_alive():
-           pass
-
-    def get_shop(self, team: Team):
-        return self.team_states[team].pet_shop
+       pass
 
     def _check_for_winner(self):
         if len(self.teams) == 1:
@@ -36,13 +34,14 @@ class Game:
     def execute_action(self, action: Action, team: Team):
         if isinstance(action, ActionBuyPet):
             process_buy_pet(action, team, self)
-
+        elif isinstance(action, ActionBuyFood):
+            process_buy_food(action, team, self)
         elif isinstance(action, ActionRefreshShop):
             process_refresh_shop(action, team, self)
-
+        elif isinstance(action, ActionFreezeFood):
+            process_freeze_food(action, team, self)
         elif isinstance(action, ActionFreezePet):
             process_freeze_pet(action, team, self)
-
         else:
             raise NotImplementedError()
 

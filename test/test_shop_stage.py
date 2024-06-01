@@ -1,3 +1,5 @@
+import copy
+
 import pytest
 
 from asap.actions.errors import *
@@ -9,7 +11,37 @@ from asap.actions import *
 from asap.team.states.shop import STARTING_MONEY
 
 
-def test_buy_and_refresh():
+def test_freeze_pet():
+    team = Team()
+    game = Game(teams=[team])
+    shop = list(game.team_states.values())[0].shop
+
+    # assert all unfrozen
+    assert not any([item.is_frozen() for item in shop.pet_shop.items.values()])
+    game.execute_action(ActionFreezePet(0), team)
+    # assert first item now frozen
+    assert shop.pet_shop.items[0].is_frozen()
+    # assert can't re-freeze
+    with pytest.raises(AlreadyFrozenError):
+        game.execute_action(ActionFreezePet(0), team)
+
+
+def test_freeze_food():
+    team = Team()
+    game = Game(teams=[team])
+    shop = list(game.team_states.values())[0].shop
+
+    # assert all unfrozen
+    assert not any([item.is_frozen() for item in shop.food_shop.items.values()])
+    game.execute_action(ActionFreezeFood(0), team)
+    # assert first item now frozen
+    assert shop.food_shop.items[0].is_frozen()
+    # assert can't re-freeze
+    with pytest.raises(AlreadyFrozenError):
+        game.execute_action(ActionFreezeFood(0), team)
+
+
+def test_buy_pets_and_refresh():
     team = Team()
     game = Game(teams=[team])
     team_state = game.team_states[team]
@@ -58,16 +90,25 @@ def test_buy_and_refresh():
             game.execute_action(ActionRefreshShop(), team)
 
 
-def test_freeze_item():
+def test_buy_pet_and_food():
     team = Team()
     game = Game(teams=[team])
-    shop = list(game.team_states.values())[0].pet_shop
+    team_state = game.team_states[team]
 
-    # assert all unfrozen
-    assert not any([item.is_frozen() for item in shop.items.values()])
-    game.execute_action(ActionFreezePet(0), team)
-    # assert first item now frozen
-    assert shop.items[0].is_frozen()
-    # assert can't re-freeze
-    with pytest.raises(AlreadyFrozenError):
-        game.execute_action(ActionFreezePet(0), team)
+    # buy a pet
+    game.execute_action(ActionBuyPet(0, 0), team)
+    health, attack = team.pets[0].health, team.pets[0].attack
+    # give it food
+    game.execute_action(ActionBuyFood(0, 0), team)
+    # make sure team has paid
+    assert team_state.money == STARTING_MONEY - 2*DEFAULT_PRICE
+    assert team.pets[0].health == health + 1
+    assert team.pets[0].attack == attack + 1
+    # assert its classified as sold
+    assert team_state.shop.food_shop.items[0].already_bought()
+    # assert it can't be re-bought
+    with pytest.raises(AlreadyBoughtError):
+        game.execute_action(ActionBuyFood(0, 0), team)
+
+    # refresh shop
+    game.execute_action(ActionRefreshShop(), team)
