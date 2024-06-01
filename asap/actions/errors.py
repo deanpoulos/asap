@@ -1,4 +1,4 @@
-from asap.engine.pets import Pet
+from asap.shop.item import Item
 
 
 class InvalidActionError(Exception):
@@ -25,6 +25,11 @@ class PositionOccupiedError(InvalidActionError):
         super().__init__(message=f"Position {i} already occupied.")
 
 
+class AlreadyFrozenError(InvalidActionError):
+    def __init__(self, item: Item):
+        super().__init__(message=f"Item {item} is already frozen.")
+
+
 class AlreadyBoughtError(InvalidActionError):
-    def __init__(self, pet: Pet):
-        super().__init__(message=f"Pet {pet} already bought.")
+    def __init__(self, item: Item):
+        super().__init__(message=f"Item {item} already bought.")

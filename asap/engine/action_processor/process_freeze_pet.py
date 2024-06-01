@@ -3,16 +3,17 @@ from asap.actions.errors import *
 from asap.team import Team
 
 
-def process_freeze_pet(_: ActionFreezePet, team: Team, game):
+def process_freeze_pet(action: ActionFreezePet, team: Team, game):
     from asap.engine.game import Game
     game: Game
 
-    team_shop_state = game.team_states[team]
-    shop = game.team_states[team].shop
+    shop = game.team_states[team].pet_shop
+    item = shop.items[action.shop_index]
 
-    roll_price = shop.roll_price
-    if team_shop_state.money < roll_price:
-        raise NotEnoughMoneyError(team_shop_state.money, roll_price)
+    if item.is_frozen():
+        raise AlreadyFrozenError(item)
 
-    team_shop_state.money -= roll_price
-    shop.refresh(game.turn)
+    if item.already_bought():
+        raise AlreadyBoughtError(item)
+
+    item.freeze()

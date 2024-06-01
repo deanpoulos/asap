@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from asap.engine.team.team import Team
+from asap.team.team import Team
 
 
 @dataclass

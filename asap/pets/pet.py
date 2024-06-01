@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from asap.engine.abilities import Ability
-from asap.engine.food import Perk
+from asap.abilities import Ability
+from asap.foods import Perk
 
 
 class Pet(ABC):

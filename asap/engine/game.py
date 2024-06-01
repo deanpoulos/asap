@@ -1,27 +1,31 @@
 from typing import List, Dict
 
-from asap.engine.actions import *
-from asap.engine.actions.errors import *
+from asap.actions import *
+from asap.engine.action_processor.process_buy_pet import process_buy_pet
+from asap.engine.action_processor.process_freeze_pet import process_freeze_pet
+from asap.engine.action_processor.process_refresh_shop import process_refresh_shop
 from asap.engine.constants import STARTING_TURN
-from asap.engine.shop import PetShop
-from asap.engine.team import Team, TeamBattleState, TeamShopState
-from asap.engine.team.constants import MAX_TEAM_SIZE
+from asap.shop import PetShop
+from asap.team import Team, TeamBattleState, TeamShopState
+from asap.team.constants import MAX_TEAM_SIZE
 
 
 class Game:
     def __init__(self, teams: List[Team]):
+        self.turn = STARTING_TURN
         self.teams: List[Team] = teams
         self.team_states: Dict[Team, TeamShopState] = {
             team: TeamShopState(team, PetShop()) for team in self.teams
         }
-        self.turn = STARTING_TURN
+        for team_shop_state in self.team_states.values():
+            team_shop_state.pet_shop.refresh(self.turn)
 
     def battle(self, team_left: Team, team_right: Team):
         while team_left.still_alive() and team_right.still_alive():
            pass
 
     def get_shop(self, team: Team):
-        return self.team_states[team].shop
+        return self.team_states[team].pet_shop
 
     def _check_for_winner(self):
         if len(self.teams) == 1:
@@ -29,38 +33,15 @@ class Game:
         else:
             return False
 
-    def submit_action(self, team: Team, action: Action):
+    def execute_action(self, action: Action, team: Team):
         if isinstance(action, ActionBuyPet):
-            team_shop_state = self.team_states[team]
-            shop = team_shop_state.shop
-
-            if shop.already_bought(action.shop_index):
-                raise AlreadyBoughtError(shop.items[action.shop_index])
-
-            item_price = shop.price(action.shop_index)
-            if team_shop_state.money < item_price:
-                raise NotEnoughMoneyError(team_shop_state.money, item_price)
-
-            if team.is_full():
-                raise TeamFullError()
-
-            if team.pets[action.pet_position] is not None:
-                raise PositionOccupiedError(action.pet_position)
-
-            team_shop_state.money -= item_price
-            pet = shop.buy(action.shop_index)
-            team.pets[action.pet_position] = pet
+            process_buy_pet(action, team, self)
 
         elif isinstance(action, ActionRefreshShop):
-            team_shop_state = self.team_states[team]
-            shop = team_shop_state.shop
+            process_refresh_shop(action, team, self)
 
-            roll_price = shop.roll_price
-            if team_shop_state.money < roll_price:
-                raise NotEnoughMoneyError(team_shop_state.money, roll_price)
-
-            team_shop_state.money -= roll_price
-            shop.refresh(self.turn)
+        elif isinstance(action, ActionFreezePet):
+            process_freeze_pet(action, team, self)
 
         else:
             raise NotImplementedError()

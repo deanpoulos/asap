@@ -1,2 +1,2 @@
-from .pet_shop import PetShop
+from .shop import PetShop, FoodShop
 from .item import PetItem

@@ -1,6 +1,6 @@
-from asap.engine.abilities import Ability
-from asap.engine.food import Perk
-from asap.engine.pets.pet import Pet
+from asap.abilities import Ability
+from asap.foods import Perk
+from asap.pets.pet import Pet
 
 
 class Duck(Pet):
@@ -61,8 +61,8 @@ class Duck(Pet):
 
 class DuckAbility(Ability):
     def on_sell(self, state):
-        from asap.engine.team.states import TeamShopState
+        from asap.team.states import TeamShopState
         state: TeamShopState
 
-        for pet_item in state.shop.items.values():
+        for pet_item in state.pet_shop.items.values():
             pet_item.pet.health += 1

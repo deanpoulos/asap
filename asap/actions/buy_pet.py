@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from asap.engine.actions import Action
+from asap.actions import Action
 
 
 @dataclass
