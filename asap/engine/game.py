@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from asap.actions import *
 from asap.engine.action_processor.process_buy_food import process_buy_food
@@ -6,21 +6,32 @@ from asap.engine.action_processor.process_buy_pet import process_buy_pet
 from asap.engine.action_processor.process_freeze_food import process_freeze_food
 from asap.engine.action_processor.process_freeze_pet import process_freeze_pet
 from asap.engine.action_processor.process_refresh_shop import process_refresh_shop
-from asap.engine.constants import STARTING_TURN
-from asap.shop import Shop
-from asap.team import Team, TeamBattleState, TeamShopState
-from asap.team.constants import MAX_TEAM_SIZE
+from asap.engine.action_processor.process_sell_pet import process_sell_pet
+from asap.engine.game_settings import GameSettings
+from asap.shop.shop import Shop
+from asap.team import Team, TeamShopState
 
 
 class Game:
-    def __init__(self, teams: List[Team]):
-        self.turn = STARTING_TURN
-        self.teams: List[Team] = teams
-        self.team_states: Dict[Team, TeamShopState] = {
-            team: TeamShopState(team, Shop()) for team in self.teams
-        }
-        for team_shop_state in self.team_states.values():
-            team_shop_state.shop.refresh(self.turn)
+    def __init__(self, num_teams: int, settings: Optional[GameSettings] = None):
+        if settings is None:
+            settings = GameSettings()
+        self.turn = settings.starting_turn
+        self.teams: List[Team] = []
+
+        for _ in range(num_teams):
+            self.teams.append(Team(settings.max_team_size))
+        self.team_states: Dict[Team, TeamShopState] = {}
+
+        for team in self.teams:
+            shop = Shop(
+                settings_pet_shop=settings.settings_pet_shop,
+                settings_food_shop=settings.settings_food_shop,
+                roll_price=settings.roll_price,
+                turn=self.turn
+            )
+            self.team_states[team] = TeamShopState(team, shop)
+            shop.refresh(self.turn)
 
     def battle(self, team_left: Team, team_right: Team):
        pass
@@ -42,6 +53,8 @@ class Game:
             process_freeze_food(action, team, self)
         elif isinstance(action, ActionFreezePet):
             process_freeze_pet(action, team, self)
+        elif isinstance(action, ActionSellPet):
+            process_sell_pet(action, team, self)
         else:
             raise NotImplementedError()
 
@@ -55,3 +68,5 @@ class Game:
     #     if team_shop_state.money == 0
     #         not_allowed_actions.append(ActionSellPet)
     #         not_allowed_actions.append(ActionSellPet)
+
+

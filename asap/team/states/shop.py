@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from asap.shop import Shop
+from asap.shop.shop import Shop
 from asap.team.team import Team
 
 

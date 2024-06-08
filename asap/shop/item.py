@@ -3,15 +3,11 @@ from typing import TypeVar, Generic
 from asap.foods.food import Food
 from asap.pets import Pet
 
-
-DEFAULT_PRICE = 3
-
-
 ItemType = TypeVar('ItemType')
 
 
 class Item(Generic[ItemType]):
-    def __init__(self, item: ItemType, price: int = DEFAULT_PRICE):
+    def __init__(self, item: ItemType, price: int):
         self.item: ItemType = item
         self.price: int = price
         self._frozen: bool = False
@@ -39,11 +35,11 @@ class Item(Generic[ItemType]):
 
 
 class PetItem(Item[Pet]):
-    def __init__(self, item: Pet):
-        super().__init__(item)
+    def __init__(self, item: Pet, price: int):
+        super().__init__(item, price)
 
 
 class FoodItem(Item[Food]):
-    def __init__(self, item: Food):
-        super().__init__(item)
+    def __init__(self, item: Food, price: int):
+        super().__init__(item, price)
 

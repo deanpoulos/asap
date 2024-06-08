@@ -64,5 +64,5 @@ class DuckAbility(Ability):
         from asap.team.states import TeamShopState
         state: TeamShopState
 
-        for pet_item in state.pet_shop.items.values():
-            pet_item.pet.health += 1
+        for pet_item in state.shop.pet_shop.items.values():
+            pet_item.item.health += 1
