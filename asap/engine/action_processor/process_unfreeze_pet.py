@@ -1,20 +1,20 @@
-from asap.actions import ActionFreezeFood
+from asap.actions import ActionUnfreezePet
 from asap.engine.action_processor._errors import *
 from asap.team import Team
 
 
-def process_freeze_food(action: ActionFreezeFood, team: Team, game):
+def process_unfreeze_pet(action: ActionUnfreezePet, team: Team, game):
     from asap.engine.game import Game
     game: Game
 
-    shop = game.team_states[team].shop.food_shop
+    shop = game.team_states[team].shop.pet_shop
 
     if shop.already_bought(action.shop_index):
         raise AlreadyBoughtError(action.shop_index)
 
     item = shop.items[action.shop_index]
 
-    if item.is_frozen():
-        raise AlreadyFrozenError(item)
+    if not item.is_frozen():
+        raise AlreadyUnfrozenError(item)
 
-    item.freeze()
+    item.unfreeze()

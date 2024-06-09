@@ -1,5 +1,5 @@
 from asap.actions import ActionBuyFood
-from asap.actions.errors import *
+from asap.engine.action_processor._errors import *
 from asap.team import Team
 
 
@@ -10,7 +10,7 @@ def process_buy_food(action: ActionBuyFood, team: Team, game):
     shop = team_shop_state.shop.food_shop
 
     if shop.already_bought(action.shop_index):
-        raise AlreadyBoughtError(shop.items[action.shop_index])
+        raise AlreadyBoughtError(action.shop_index)
 
     item_price = shop.price(action.shop_index)
     if team_shop_state.money < item_price:

@@ -3,8 +3,10 @@ from asap.perks import Perk
 
 
 class Apple(Food):
+    base_attack = 1
+    base_health = 1
 
-    def __init__(self, attack: int = 1, health: int = 1):
+    def __init__(self, attack: int = base_attack, health: int = base_health):
         self._attack = attack
         self._health = health
         self._perk = None

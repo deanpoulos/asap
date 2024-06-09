@@ -13,16 +13,16 @@ class PetShop(GenericShop[Pet]):
     def __init__(self, settings: SettingsPetShop, turn: int):
         super().__init__()
         self.settings: SettingsPetShop = settings
-        self.items: PetItemsDict = \
+        self._items: PetItemsDict = \
             {i: None for i in range(self.pet_shop_size(turn))}
 
     def refresh(self, turn: int):
         item_pool = self.pet_shop_pool(turn)
 
         for i in range(self.pet_shop_size(turn)):
-            item = self.items[i]
+            item = self._items[i]
             if item is None or not item.is_frozen():
-                self.items[i] = PetItem(item=choice(item_pool)(), price=self.settings.PRICE_BUY_PET)
+                self._items[i] = PetItem(item=choice(item_pool)(), price=self.settings.PRICE_BUY_PET)
 
     def pet_shop_size(self, turn: int) -> int:
         if turn < 3:

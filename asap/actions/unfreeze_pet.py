@@ -4,6 +4,5 @@ from asap.actions import Action
 
 
 @dataclass
-class ActionBuyPet(Action):
+class ActionUnfreezePet(Action):
     shop_index: int
-    pet_position: int

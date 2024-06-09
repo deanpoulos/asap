@@ -30,11 +30,32 @@ class PositionNotOccupiedError(InvalidActionError):
         super().__init__(message=f"There is no pet in position {i}.")
 
 
+class AlreadyUnfrozenError(InvalidActionError):
+    def __init__(self, item: Item):
+        super().__init__(message=f"Item {item} is already unfrozen.")
+
+
 class AlreadyFrozenError(InvalidActionError):
     def __init__(self, item: Item):
         super().__init__(message=f"Item {item} is already frozen.")
 
 
 class AlreadyBoughtError(InvalidActionError):
-    def __init__(self, item: Item):
-        super().__init__(message=f"Item {item} already bought.")
+    def __init__(self, shop_index: int):
+        super().__init__(message=f"Item {shop_index} already bought.")
+
+
+class InvalidSwapError(InvalidActionError):
+    def __init__(self, pet_position_1: int, pet_position_2: int):
+        super().__init__(message=f"Invalid swap {pet_position_1} to {pet_position_2}")
+
+
+class InvalidMergeError(InvalidActionError):
+    def __init__(self, pet_position_1: int, pet_position_2: int):
+        super().__init__(message=f"Invalid merge from team position {pet_position_1} to {pet_position_2}")
+
+
+class InvalidBuyMergeError(InvalidActionError):
+    def __init__(self, shop_index: int, pet_position: int):
+        super().__init__(message=f"Invalid merge from shop position {shop_index} "
+                                 f"to team position {pet_position}")

@@ -13,16 +13,16 @@ class FoodShop(GenericShop[Food]):
     def __init__(self, settings: SettingsFoodShop, turn: int):
         super().__init__()
         self.settings: SettingsFoodShop = settings
-        self.items: ItemsDict = \
+        self._items: ItemsDict = \
             {i: None for i in range(self.food_shop_size(turn))}
 
     def refresh(self, turn: int):
         item_pool = self.food_shop_pool(turn)
 
         for i in range(self.food_shop_size(turn)):
-            item = self.items[i]
+            item = self._items[i]
             if item is None or not item.is_frozen():
-                self.items[i] = FoodItem(item=choice(item_pool)(), price=self.settings.PRICE_BUY_FOOD)
+                self._items[i] = FoodItem(item=choice(item_pool)(), price=self.settings.PRICE_BUY_FOOD)
 
     def food_shop_size(self, turn: int) -> int:
         if turn < 3:

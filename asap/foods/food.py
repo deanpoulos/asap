@@ -35,8 +35,8 @@ class Food(ABC):
         pass
 
     def on_consume(self, pet: Pet):
-        pet.health += self.health
-        pet.attack += self.attack
+        pet.extra_health += self.health
+        pet.extra_attack += self.attack
         if self.perk is not None:
             pet.perk = self.perk
 

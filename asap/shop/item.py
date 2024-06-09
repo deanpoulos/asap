@@ -11,7 +11,6 @@ class Item(Generic[ItemType]):
         self.item: ItemType = item
         self.price: int = price
         self._frozen: bool = False
-        self._bought: bool = False
 
     def freeze(self):
         self._frozen = True
@@ -22,16 +21,9 @@ class Item(Generic[ItemType]):
     def is_frozen(self) -> bool:
         return self._frozen
 
-    def buy(self):
-        self._bought = True
-
-    def already_bought(self):
-        return self._bought
-
     def __str__(self):
-        return f"${self.price}: {self.item}" \
-               f'{" (frozen)" if self.is_frozen() else ""}' \
-               f'{" SOLD!" if self.already_bought() else ""}'
+        return f"${self.price} {self.item}" \
+               f'{" (frozen)" if self.is_frozen() else ""}'
 
 
 class PetItem(Item[Pet]):

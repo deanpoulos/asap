@@ -1,67 +1,80 @@
-from abc import ABC, abstractmethod
 from asap.abilities import Ability
 from asap.perks import Perk
 
 
-class Pet(ABC):
+class Pet:
+    def __init__(self):
+        self._extra_attack = 0
+        self._extra_health = 0
 
     @property
-    @abstractmethod
+    def extra_attack(self) -> int:
+        return self._extra_attack
+
+    @extra_attack.setter
+    def extra_attack(self, value: int):
+        self._extra_attack = value
+
+    @property
     def attack(self) -> int:
-        pass
-
-    @attack.setter
-    @abstractmethod
-    def attack(self, value: int):
-        pass
+        return (self._attack +
+                self._extra_attack +
+                self._exp)
 
     @property
-    @abstractmethod
+    def extra_health(self) -> int:
+        return self._extra_health
+
+    @extra_health.setter
+    def extra_health(self, value: int):
+        self._extra_health = value
+
+    @property
     def health(self) -> int:
-        pass
-
-    @health.setter
-    @abstractmethod
-    def health(self, value: int):
-        pass
+        return (self._health +
+                self._extra_health +
+                self._exp)
 
     @property
-    @abstractmethod
-    def level(self) -> int:
-        pass
-
-    @level.setter
-    @abstractmethod
-    def level(self, value: int):
-        pass
-
-    @property
-    @abstractmethod
     def ability(self) -> Ability:
-        pass
+        return self._ability
 
     @ability.setter
-    @abstractmethod
     def ability(self, value: Ability):
-        pass
+        self._ability = value
 
     @property
-    @abstractmethod
     def perk(self) -> Perk:
-        pass
+        return self._perk
 
     @perk.setter
-    @abstractmethod
     def perk(self, value: Perk):
-        pass
+        self._perk = value
 
-    @abstractmethod
     def on_sell(self, state):
-        pass
+        self.ability.on_sell(state)
 
-    @abstractmethod
     def on_buy(self, state):
-        pass
+        self.ability.on_buy(state)
+
+    def add_1_exp(self):
+        if self._exp < 5:
+            self._exp += 1
+        else:
+            raise Exception()
+
+    @property
+    def exp(self) -> int:
+        return self._exp
+
+    @property
+    def level(self) -> int:
+        if self._exp < 2:
+            return 1
+        elif self._exp < 5:
+            return 2
+        else:
+            return 3
 
     def __str__(self):
-        return f"{type(self).__name__}({self.health},{self.attack})"
+        return f"{type(self).__name__}({self.attack},{self.health})"
