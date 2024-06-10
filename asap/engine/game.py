@@ -15,6 +15,7 @@ from asap.engine.action_processor.process_sell_pet import process_sell_pet
 from asap.engine.action_processor.process_swap_pets import process_swap_pets
 from asap.engine.action_processor.process_unfreeze_food import process_unfreeze_food
 from asap.engine.action_processor.process_unfreeze_pet import process_unfreeze_pet
+from asap.engine.action_validator.validate_refresh_shop import validate_refresh_shop
 from asap.engine.game_settings import GameSettings
 from asap.shop.shop import Shop
 from asap.team import Team, TeamShopState
@@ -27,7 +28,6 @@ class Game:
         if settings is None:
             settings = GameSettings()
         self.settings = settings
-        self.turn = settings.starting_turn
         self.teams: List[Team] = []
 
         for _ in range(num_teams):
@@ -39,13 +39,10 @@ class Game:
                 settings_pet_shop=settings.settings_pet_shop,
                 settings_food_shop=settings.settings_food_shop,
                 roll_price=settings.roll_price,
-                turn=self.turn
+                turn=self.settings.starting_turn
             )
             self.team_states[team] = TeamShopState(team, shop)
-            shop.refresh(self.turn)
-
-    def battle(self, team_left: Team, team_right: Team):
-       pass
+            shop.refresh()
 
     def _check_for_winner(self):
         if len(self.teams) == 1:
@@ -81,15 +78,19 @@ class Game:
 
         # logging.debug(f"\nTEAM: {team}\nSHOP: {self.team_states[team].shop}")
 
+    #
     # def allowed_actions(self, team: Team):
-    #     not_allowed_actions = []
+    #     action_space: Dict[Action, bool] = {}
+    #
     #     team_shop_state = self.team_states[team]
-    #     if len(team.pets) == 5:
-    #         not_allowed_actions.append(ActionBuyPet)
-    #     if len(team.pets) == 0:
-    #         not_allowed_actions.append(ActionSellPet)
-    #     if team_shop_state.money == 0
-    #         not_allowed_actions.append(ActionSellPet)
-    #         not_allowed_actions.append(ActionSellPet)
-
-
+    #     pet_shop_settings = self.settings.settings_pet_shop
+    #
+    #     # actions with no input
+    #     action_space[ActionRefreshShop()] = validate_refresh_shop(team_shop_state, team)
+    #
+    #     # actions parameterized by pet shop index input
+    #     shop_index_space = (pet_shop_settings.TIER_6_PET_SHOP_SIZE +
+    #                         pet_shop_settings.NUM_HIGHER_TIER_UNLOCKS*3)
+    #
+    #     for shop_index in range(shop_index_space):
+    #         action_space[ActionFreezePet(shop_index)] = validate_freeze_pet

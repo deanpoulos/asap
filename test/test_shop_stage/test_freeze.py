@@ -19,7 +19,7 @@ def test_freeze_unfreeze_pet(game_turn_1_ducks_only_apples_only_single_team):
     with pytest.raises(AlreadyFrozenError):
         game.execute_action(ActionFreezePet(0), team)
     # assert persistence after shop refresh
-    shop.refresh(game.turn)
+    shop.refresh()
     assert shop.pet_shop.items[0] == item
     # assert can unfreeze
     game.execute_action(ActionUnfreezePet(0), team)
@@ -31,7 +31,7 @@ def test_freeze_unfreeze_pet(game_turn_1_ducks_only_apples_only_single_team):
         game.execute_action(ActionUnfreezePet(0), team)
     # assert non-persistence after shop refresh
     item = shop.pet_shop.items[0]
-    shop.refresh(game.turn)
+    shop.refresh()
     assert shop.pet_shop.items[0] != item
 
 
@@ -50,7 +50,7 @@ def test_freeze_food(game_turn_1_ducks_only_apples_only_single_team):
     with pytest.raises(AlreadyFrozenError):
         game.execute_action(ActionFreezeFood(0), team)
     # assert persistence after shop refresh
-    shop.refresh(game.turn)
+    shop.refresh()
     assert shop.food_shop.items[0] == item
     assert item.is_frozen()
     # assert can unfreeze
@@ -63,5 +63,5 @@ def test_freeze_food(game_turn_1_ducks_only_apples_only_single_team):
         game.execute_action(ActionUnfreezeFood(0), team)
     # assert non-persistence after shop refresh
     item = shop.pet_shop.items[0]
-    shop.refresh(game.turn)
+    shop.refresh()
     assert shop.food_shop.items[0] != item

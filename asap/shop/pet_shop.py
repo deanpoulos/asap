@@ -14,17 +14,12 @@ class PetShop(GenericShop[Pet]):
         super().__init__()
         self.settings: SettingsPetShop = settings
         self._items: PetItemsDict = \
-            {i: None for i in range(self.pet_shop_size(turn))}
+            {i: None for i in range(self.shop_size(turn))}
 
-    def refresh(self, turn: int):
-        item_pool = self.pet_shop_pool(turn)
+    def roll_new_item(self, item_pool: List[Type[Pet]]) -> PetItem:
+        return PetItem(item=choice(item_pool)(), price=self.settings.PRICE_BUY_PET)
 
-        for i in range(self.pet_shop_size(turn)):
-            item = self._items[i]
-            if item is None or not item.is_frozen():
-                self._items[i] = PetItem(item=choice(item_pool)(), price=self.settings.PRICE_BUY_PET)
-
-    def pet_shop_size(self, turn: int) -> int:
+    def shop_size(self, turn: int) -> int:
         if turn < 3:
             return self.settings.TIER_1_PET_SHOP_SIZE
         elif turn < 5:
@@ -39,11 +34,32 @@ class PetShop(GenericShop[Pet]):
             return self.settings.TIER_6_PET_SHOP_SIZE
 
     @lru_cache(maxsize=None)
-    def pet_shop_pool(self, turn: int) -> List[Type[Pet]]:
+    def shop_pool(self, turn: int) -> List[Type[Pet]]:
         pet_pool = []
         if turn < 3:
             pet_pool.extend(self.settings.TIER_1_PETS)
+        elif turn < 5:
+            pet_pool.extend(self.settings.TIER_2_PETS)
+        elif turn < 7:
+            pet_pool.extend(self.settings.TIER_3_PETS)
+        elif turn < 9:
+            pet_pool.extend(self.settings.TIER_4_PETS)
+        elif turn < 11:
+            pet_pool.extend(self.settings.TIER_5_PETS)
         else:
-            pass
+            pet_pool.extend(self.settings.TIER_6_PETS)
 
         return pet_pool
+
+    def add_higher_tier_options(self, turn: int):
+        higher_tier_turn_equivalent = turn + 2
+        item_pool = self.shop_pool(turn=higher_tier_turn_equivalent)
+        higher_tier_options = {
+            i: self.roll_new_item(item_pool)
+            for i in range(self.settings.NUM_HIGHER_TIER_UNLOCKS)
+        }
+        current_shop_pushed_back = {
+            k + self.settings.NUM_HIGHER_TIER_UNLOCKS: v
+            for k, v in self._items.items()
+        }
+        self._items = {**higher_tier_options, **current_shop_pushed_back}

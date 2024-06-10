@@ -1,8 +1,8 @@
 import abc
 import copy
-from typing import Generic
+from typing import Generic, List, Type
 
-from asap.shop.item import ItemType
+from asap.shop.item import ItemType, Item
 from asap.shop.generic_items_dict import ItemsDict
 
 
@@ -32,8 +32,30 @@ class GenericShop(Generic[ItemType]):
     def already_bought(self, index: int) -> bool:
         return self._items[index] is None
 
-    @abc.abstractmethod
     def refresh(self, turn: int):
+        item_pool = self.shop_pool(turn)
+
+        frozen_items = [item for item in self.items.values() if item.is_frozen()]
+
+        refreshed_items = []
+        for _ in range(self.shop_size(turn) - len(frozen_items)):
+            refreshed_items.append(self.roll_new_item(item_pool))
+
+        new_shop_items = frozen_items + refreshed_items
+
+        self._items = {}
+        for i in range(max(self.shop_size(turn), len(new_shop_items))):
+            self._items[i] = new_shop_items[i]
+
+    @abc.abstractmethod
+    def shop_size(self, turn: int) -> int:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def shop_pool(self, turn: int) -> List[Type[ItemType]]:
+        raise NotImplementedError()
+
+    def roll_new_item(self, item_pool: List[Type[ItemType]]) -> Item[ItemType]:
         raise NotImplementedError()
 
     def __str__(self):

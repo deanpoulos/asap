@@ -14,17 +14,12 @@ class FoodShop(GenericShop[Food]):
         super().__init__()
         self.settings: SettingsFoodShop = settings
         self._items: ItemsDict = \
-            {i: None for i in range(self.food_shop_size(turn))}
+            {i: None for i in range(self.shop_size(turn))}
 
-    def refresh(self, turn: int):
-        item_pool = self.food_shop_pool(turn)
+    def roll_new_item(self, item_pool: List[Type[Food]]) -> FoodItem:
+        return FoodItem(item=choice(item_pool)(), price=self.settings.PRICE_BUY_FOOD)
 
-        for i in range(self.food_shop_size(turn)):
-            item = self._items[i]
-            if item is None or not item.is_frozen():
-                self._items[i] = FoodItem(item=choice(item_pool)(), price=self.settings.PRICE_BUY_FOOD)
-
-    def food_shop_size(self, turn: int) -> int:
+    def shop_size(self, turn: int) -> int:
         if turn < 3:
             return self.settings.TIER_1_FOOD_SHOP_SIZE
         elif turn < 5:
@@ -39,12 +34,11 @@ class FoodShop(GenericShop[Food]):
             return self.settings.TIER_6_FOOD_SHOP_SIZE
 
     @lru_cache(maxsize=None)
-    def food_shop_pool(self, turn: int) -> List[Type[Food]]:
-        pet_pool = []
+    def shop_pool(self, turn: int) -> List[Type[Food]]:
+        item_pool = []
         if turn < 3:
-            pet_pool.extend(self.settings.TIER_1_FOODS)
+            item_pool.extend(self.settings.TIER_1_FOODS)
         else:
             pass
 
-        return pet_pool
-
+        return item_pool

@@ -21,6 +21,6 @@ def process_buy_food(action: ActionBuyFood, team: Team, game):
         raise PositionNotOccupiedError(action.pet_position)
 
     team_shop_state.money -= item_price
-    food = shop.buy(action.shop_index)
+    food = team_shop_state.shop.buy_food(action.shop_index)
 
     food.on_consume(pet)

@@ -10,6 +10,6 @@ def buy_pet(team_shop_state: TeamShopState,
 
     item_price = shop.price(action.shop_index)
     team_shop_state.money -= item_price
-    pet = shop.buy(action.shop_index)
+    pet = team_shop_state.shop.buy_pet(action.shop_index)
 
     return pet

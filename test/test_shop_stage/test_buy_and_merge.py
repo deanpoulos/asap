@@ -22,10 +22,10 @@ def test_buy_and_merge(game_turn_1_ducks_only_apples_only_single_team):
     assert team.pets[0].health == Duck.base_health + 1
     assert team.pets[0].attack == Duck.base_attack + 1
 
-    shop = game.team_states[team].shop.pet_shop
+    shop = game.team_states[team].shop
     game.team_states[team].money = 100
     for _ in range(4):
-        shop.refresh(game.turn)
+        shop.refresh()
         game.execute_action(ActionBuyAndMergePet(0, 0), team)
 
     assert team.pets[0].exp == 5
@@ -34,6 +34,6 @@ def test_buy_and_merge(game_turn_1_ducks_only_apples_only_single_team):
     assert team.pets[0].attack == Duck.base_attack + 5
 
     # assert can't merge beyond max level
-    shop.refresh(game.turn)
+    shop.refresh()
     with pytest.raises(InvalidBuyMergeError):
         game.execute_action(ActionBuyAndMergePet(0, 0), team)
