@@ -1,0 +1,85 @@
+#!/bin/bash
+# e.g. ./download_icon Apple Duck
+
+# Ensure that the required tools are installed
+if ! command -v wget &> /dev/null || ! command -v grep &> /dev/null || ! command -v sed &> /dev/null
+then
+    echo "This script requires wget, grep, and sed. Please install them."
+    exit 1
+fi
+
+# Function to search and download the image from a given URL
+search_and_download() {
+    local BASE_URL=$1
+    local MAIN_PAGE_URL=$2
+    local SEARCH_TERM=$3
+    local TEMP_MAIN_PAGE=$4
+    local TEMP_PET_PAGE=$5
+    local OUTPUT_FILE=$6
+
+    # Download the main page
+    wget -q -O "$TEMP_MAIN_PAGE" "$MAIN_PAGE_URL"
+
+    # Find a link to the pet page
+    PET_PAGE_URL=$(grep -oP '(?<=href=")/wiki/[^"]*' "$TEMP_MAIN_PAGE" | grep -i "$SEARCH_TERM" | head -n 1)
+    if [ -z "$PET_PAGE_URL" ]; then
+        return 1
+    fi
+
+    # Follow the link to the pet page and download it
+    wget -q -O "$TEMP_PET_PAGE" "$BASE_URL$PET_PAGE_URL"
+
+    # Find a link to the PNG image on the pet page
+    IMAGE_URL=$(grep -oP '(?<=href=")[^"]*\.png' "$TEMP_PET_PAGE" | grep -i "$SEARCH_TERM" | head -n 1)
+    if [ -z "$IMAGE_URL" ]; then
+        return 1
+    fi
+
+    # Download the image permanently
+    wget -q -O "$OUTPUT_FILE" "$BASE_URL$IMAGE_URL"
+    if [ $? -eq 0 ]; then
+        echo "Image saved as $OUTPUT_FILE"
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Check for input arguments
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 <search-term1> <search-term2> ... <search-termN>"
+    exit 1
+fi
+
+BASE_URL="https://superautopets.wiki.gg"
+TEMP_MAIN_PAGE="main_page.html"
+TEMP_PET_PAGE="pet_page.html"
+
+# Iterate over all search terms provided as arguments
+for SEARCH_TERM in "$@"; do
+    OUTPUT_FILE="${SEARCH_TERM// /_}.png"
+
+    # Iterate through the tiers and search both pets and food pages
+    for TIER in {1..6}; do
+        # Search in pets pages
+        MAIN_PAGE_URL="$BASE_URL/wiki/Pets#Tier_${TIER}-0"
+        if search_and_download "$BASE_URL" "$MAIN_PAGE_URL" "$SEARCH_TERM" "$TEMP_MAIN_PAGE" "$TEMP_PET_PAGE" "$OUTPUT_FILE"; then
+            break
+        fi
+
+        # Search in food pages
+        MAIN_PAGE_URL="$BASE_URL/wiki/Food#Tier_${TIER}-0"
+        if search_and_download "$BASE_URL" "$MAIN_PAGE_URL" "$SEARCH_TERM" "$TEMP_MAIN_PAGE" "$TEMP_PET_PAGE" "$OUTPUT_FILE"; then
+            break
+        fi
+    done
+
+    if [ ! -f "$OUTPUT_FILE" ]; then
+        echo "No matching image found for $SEARCH_TERM"
+    fi
+
+    # Clean up temporary files
+    rm -f "$TEMP_MAIN_PAGE" "$TEMP_PET_PAGE"
+done
+
+exit 0

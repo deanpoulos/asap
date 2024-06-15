@@ -36,9 +36,7 @@ class FoodShop(GenericShop[Food]):
     @lru_cache(maxsize=None)
     def shop_pool(self, turn: int) -> List[Type[Food]]:
         item_pool = []
-        if turn < 3:
+        if turn > 1:
             item_pool.extend(self.settings.TIER_1_FOODS)
-        else:
-            pass
 
         return item_pool

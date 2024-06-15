@@ -36,17 +36,17 @@ class PetShop(GenericShop[Pet]):
     @lru_cache(maxsize=None)
     def shop_pool(self, turn: int) -> List[Type[Pet]]:
         pet_pool = []
-        if turn < 3:
+        if turn > 1:
             pet_pool.extend(self.settings.TIER_1_PETS)
-        elif turn < 5:
+        if turn > 3:
             pet_pool.extend(self.settings.TIER_2_PETS)
-        elif turn < 7:
+        if turn > 5:
             pet_pool.extend(self.settings.TIER_3_PETS)
-        elif turn < 9:
+        if turn > 7:
             pet_pool.extend(self.settings.TIER_4_PETS)
-        elif turn < 11:
+        if turn > 9:
             pet_pool.extend(self.settings.TIER_5_PETS)
-        else:
+        if turn > 11:
             pet_pool.extend(self.settings.TIER_6_PETS)
 
         return pet_pool
