@@ -1,7 +1,7 @@
 # pet_icon.py
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 import tkinter as tk
-from drawing_utils import fetch_image, overlay_freeze_icon, create_ellipse
+from asap.ui.drawing_utils import fetch_image, overlay_freeze_icon, create_ellipse
 
 
 def create_pet_icon(pet, price=None, level=None, frozen=False):
@@ -71,10 +71,11 @@ def create_pet_icon(pet, price=None, level=None, frozen=False):
     return ImageTk.PhotoImage(new_image)
 
 
-class PetIcon(tk.Label):
+class PetIcon(tk.Canvas):
     def __init__(self, master, pet, price=None, level=None, frozen=False, on_click=None, **kwargs):
+        super().__init__(master, bg="black", highlightthickness=0, **kwargs)
         self.pet_image = create_pet_icon(pet, price=price, level=level, frozen=frozen)
-        super().__init__(master, image=self.pet_image, **kwargs)
+        self.create_image(0, 0, image=self.pet_image, anchor="nw")
         self.pet = pet
         self.price = price
         self.level = level

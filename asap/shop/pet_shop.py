@@ -34,26 +34,32 @@ class PetShop(GenericShop[Pet]):
             return self.settings.TIER_6_PET_SHOP_SIZE
 
     @lru_cache(maxsize=None)
-    def shop_pool(self, turn: int) -> List[Type[Pet]]:
+    def shop_pool(self, turn: int, exclusive: bool = False) -> List[Type[Pet]]:
         pet_pool = []
-        if turn > 1:
+        if turn >= 1:
+            if exclusive: pet_pool = []
             pet_pool.extend(self.settings.TIER_1_PETS)
-        if turn > 3:
+        if turn >= 3:
+            if exclusive: pet_pool = []
             pet_pool.extend(self.settings.TIER_2_PETS)
-        if turn > 5:
+        if turn >= 5:
+            if exclusive: pet_pool = []
             pet_pool.extend(self.settings.TIER_3_PETS)
-        if turn > 7:
+        if turn >= 7:
+            if exclusive: pet_pool = []
             pet_pool.extend(self.settings.TIER_4_PETS)
-        if turn > 9:
+        if turn >= 9:
+            if exclusive: pet_pool = []
             pet_pool.extend(self.settings.TIER_5_PETS)
-        if turn > 11:
+        if turn >= 11:
+            if exclusive: pet_pool = []
             pet_pool.extend(self.settings.TIER_6_PETS)
 
         return pet_pool
 
     def add_higher_tier_options(self, turn: int):
         higher_tier_turn_equivalent = turn + 2
-        item_pool = self.shop_pool(turn=higher_tier_turn_equivalent)
+        item_pool = self.shop_pool(turn=higher_tier_turn_equivalent, exclusive=True)
         higher_tier_options = {
             i: self.roll_new_item(item_pool)
             for i in range(self.settings.NUM_HIGHER_TIER_UNLOCKS)

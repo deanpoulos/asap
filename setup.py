@@ -8,9 +8,14 @@ setup(
     author_email='dean.poulos7@gmail.com',
     url='https://github.com/deanpoulos/ASAP',
     packages=find_packages(),
+    include_package_data=True,
+    package_data={
+        'asap.ui': ['img/*']
+    },
     install_requires=[
         'gym',
         'stable-baselines3',
+        'Pillow',
         # Add other dependencies here
     ],
     entry_points={

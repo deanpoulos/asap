@@ -52,7 +52,7 @@ class GenericShop(Generic[ItemType]):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def shop_pool(self, turn: int) -> List[Type[ItemType]]:
+    def shop_pool(self, turn: int, exclusive: bool = False) -> List[Type[ItemType]]:
         raise NotImplementedError()
 
     def roll_new_item(self, item_pool: List[Type[ItemType]]) -> Item[ItemType]:

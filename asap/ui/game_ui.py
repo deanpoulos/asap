@@ -1,14 +1,14 @@
 # game_ui.py
 import tkinter as tk
 from PIL import Image, ImageTk
-from pet_icon import PetIcon
-from food_icon import FoodIcon
-from info_banner import InfoBanner
-from actions import sell_pet, handle_team_click, handle_item_click, deselect_item
-from event_bindings import bind_freeze_pet, bind_freeze_food, roll, end_turn, freeze_pet, unfreeze_pet, freeze_food, unfreeze_food
-from asap.engine.game_settings import GameSettings
-from asap.engine.game import Game
-from asap.pets import Duck
+
+import asap
+from asap.ui.pet_icon import PetIcon
+from asap.ui.food_icon import FoodIcon
+from asap.ui.info_banner import InfoBanner
+from asap.ui.actions import sell_pet, select_pet, deselect_pet, handle_team_click, swap_or_merge_pets, handle_item_click, deselect_item
+from asap.ui.event_bindings import bind_freeze_pet, bind_freeze_food, roll, end_turn, freeze_pet, unfreeze_pet, freeze_food, unfreeze_food
+import importlib.resources as pkg_resources
 
 class GameUI(tk.Tk):
     def __init__(self, game):
@@ -27,33 +27,34 @@ class GameUI(tk.Tk):
         self.update_display()
 
     def create_background(self):
-        bg_image_path = "./img/bg/Field.png"
-        bg_image = Image.open(bg_image_path)
-        bg_image = bg_image.resize((1600, 900), Image.Resampling.LANCZOS)
-        self.bg_image = ImageTk.PhotoImage(bg_image)
+        with pkg_resources.path(asap.ui.img.backgrounds, 'Cyber_Space.png') as bg_image_path:
+            bg_image = Image.open(bg_image_path)
+            bg_image = bg_image.resize((1600, 900), Image.Resampling.LANCZOS)
+            self.bg_image = ImageTk.PhotoImage(bg_image)
 
         self.bg_label = tk.Label(self, image=self.bg_image)
         self.bg_label.place(relwidth=1, relheight=1)
+        pass
 
     def create_widgets(self):
         # Place the widgets on top of the background label
         self.info_banner = InfoBanner(self.bg_label)
         self.info_banner.pack(anchor='nw', pady=10, padx=10)
 
-        self.team_frame = tk.Frame(self.bg_label, bg='grey')
+        self.team_frame = tk.Frame(self.bg_label, bg='black')
         self.team_frame.pack(pady=20)
         self.team_frame.place(relx=0.1, rely=0.45, anchor='w')  # Move up slightly
 
-        self.shop_frame = tk.Frame(self.bg_label, bg='grey')
+        self.shop_frame = tk.Frame(self.bg_label, bg='black')
         self.shop_frame.pack(side=tk.LEFT, anchor='sw', padx=20, pady=20)
         self.shop_frame.place(relx=0.1, rely=0.75, anchor='w')  # Move up slightly
 
-        self.food_shop_frame = tk.Frame(self.bg_label, bg='grey')
+        self.food_shop_frame = tk.Frame(self.bg_label, bg='black')
         self.food_shop_frame.pack(side=tk.RIGHT, anchor='se', padx=20, pady=20)
         self.food_shop_frame.place(relx=0.9, rely=0.75, anchor='e')  # Move up slightly
 
         # Create frame for Sell and End Turn buttons
-        self.button_frame = tk.Frame(self.bg_label, bg='grey')
+        self.button_frame = tk.Frame(self.bg_label, bg='black')
         self.button_frame.place(relx=0.95, rely=0.95, anchor='se')
 
         # Add Sell button
@@ -82,7 +83,7 @@ class GameUI(tk.Tk):
             widget.destroy()
         for i in range(len(self.team.pets)):
             pet = self.team.pets[i]
-            frame = tk.Frame(self.team_frame, width=150, height=150, bg='grey', highlightbackground='yellow', highlightthickness=0)
+            frame = tk.Frame(self.team_frame, width=150, height=150, bg='black', highlightbackground='yellow', highlightthickness=0)
             frame.pack_propagate(False)
             frame.pack(side=tk.LEFT, padx=5, pady=5)
             if pet:
@@ -101,7 +102,7 @@ class GameUI(tk.Tk):
         for widget in self.shop_frame.winfo_children():
             widget.destroy()
         for i, pet_item in enumerate(team_state.shop.pet_shop._items.values()):
-            frame = tk.Frame(self.shop_frame, width=150, height=150, bg='grey', highlightbackground='yellow', highlightthickness=0)
+            frame = tk.Frame(self.shop_frame, width=150, height=150, bg='black', highlightbackground='yellow', highlightthickness=0)
             frame.pack_propagate(False)
             frame.pack(side=tk.LEFT, padx=5, pady=5)
             if pet_item:
@@ -115,7 +116,7 @@ class GameUI(tk.Tk):
         for widget in self.food_shop_frame.winfo_children():
             widget.destroy()
         for i, food_item in enumerate(team_state.shop.food_shop._items.values()):
-            frame = tk.Frame(self.food_shop_frame, width=150, height=150, bg='grey', highlightbackground='yellow', highlightthickness=0)
+            frame = tk.Frame(self.food_shop_frame, width=150, height=150, bg='black', highlightbackground='yellow', highlightthickness=0)
             frame.pack_propagate(False)
             frame.pack(side=tk.LEFT, padx=5, pady=5)
             if food_item:
@@ -127,14 +128,3 @@ class GameUI(tk.Tk):
 
         # Bind deselect_item to any click on the background
         self.bg_label.bind("<Button-1>", lambda event: deselect_item(self))
-
-if __name__ == "__main__":
-    settings = GameSettings(starting_turn=5)
-    game = Game(num_teams=1, settings=settings)
-
-    # Add two ducks to the team
-    duck1 = Duck()
-    game.teams[0].add_pet(0, duck1)
-
-    app = GameUI(game)
-    app.mainloop()

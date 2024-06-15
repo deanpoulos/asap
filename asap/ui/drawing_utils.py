@@ -1,6 +1,7 @@
 # drawing_utils.py
-import os
 from PIL import Image, ImageDraw, ImageFont
+import importlib.resources as pkg_resources
+from asap.ui import img
 
 def create_ellipse(draw, center, radius, text, font, color, text_color):
     x, y = center
@@ -10,12 +11,12 @@ def create_ellipse(draw, center, radius, text, font, color, text_color):
     text_y = y - (text_bbox[3] - text_bbox[1]) // 2
     draw.text((text_x, text_y), text, fill=text_color, font=font)
 
-def fetch_image(item_name):
-    image_path = os.path.join("img", f"{item_name}.png")
-    if os.path.exists(image_path):
-        return Image.open(image_path).resize((100, 100))
-    else:
-        raise Exception(f"Image for {item_name} not found in 'img' directory")
+
+def fetch_image(image_name):
+    img_path = pkg_resources.path(img, f'{image_name}.png')
+    with img_path as path:
+        return Image.open(path).resize((100, 100))
+
 
 def overlay_freeze_icon(image):
     """

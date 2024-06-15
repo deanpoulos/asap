@@ -18,8 +18,8 @@ def process_merge_pets(action: ActionMergePets, team: Team, game):
         # both must be the same pet type
         (not isinstance(team.pets[action.position_from],
                         type(team.pets[action.position_to]))) or
-        # both must not be maximum level
-        (team.pets[action.position_from].level == game.settings.max_pet_level and
+        # neither must be maximum level
+        (team.pets[action.position_from].level == game.settings.max_pet_level or
          team.pets[action.position_to].level == game.settings.max_pet_level)
     ):
         raise InvalidMergeError(action.position_from, action.position_to)

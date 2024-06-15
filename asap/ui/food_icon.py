@@ -1,9 +1,9 @@
 # food_icon.py
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 import tkinter as tk
-from drawing_utils import fetch_image, overlay_freeze_icon, create_ellipse
+from asap.ui.drawing_utils import fetch_image, overlay_freeze_icon, create_ellipse
 
-def create_food_icon(food, frozen=False, price=None):
+def create_food_icon(food, frozen=False):
     food_name = type(food.item).__name__
     food_image = fetch_image(food_name)
 
@@ -24,19 +24,18 @@ def create_food_icon(food, frozen=False, price=None):
     font = ImageFont.truetype("arial", 18)  # Adjust font size
 
     # Draw price in yellow bubble
-    price = food.price
     price_center = (new_size[0] - (radius + margin), radius)
-    create_ellipse(draw, price_center, radius, str(price), font, "yellow", "black")
+    create_ellipse(draw, price_center, radius, str(food.price), font, "yellow", "black")
 
     return ImageTk.PhotoImage(new_image)
 
-class FoodIcon(tk.Label):
-    def __init__(self, master, food, frozen=False, price=None, on_click=None, **kwargs):
-        self.food_image = create_food_icon(food, frozen=frozen, price=price)
-        super().__init__(master, image=self.food_image, **kwargs)
+class FoodIcon(tk.Canvas):
+    def __init__(self, master, food, frozen=False, on_click=None, **kwargs):
+        super().__init__(master, bg="black", highlightthickness=0, **kwargs)
+        self.food_image = create_food_icon(food, frozen=frozen)
+        self.create_image(0, 0, image=self.food_image, anchor="nw")
         self.food = food
         self.frozen = frozen
-        self.price = price
 
         if on_click:
             self.bind("<Button-1>", on_click)

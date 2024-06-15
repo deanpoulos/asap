@@ -41,7 +41,7 @@ class Game:
                 roll_price=settings.roll_price,
                 turn=self.settings.starting_turn
             )
-            self.team_states[team] = TeamShopState(team, shop)
+            self.team_states[team] = TeamShopState(team, settings.starting_money, shop)
             shop.refresh()
 
     def _check_for_winner(self):
