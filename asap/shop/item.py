@@ -1,4 +1,5 @@
-from typing import TypeVar, Generic
+import typing
+from typing import TypeVar, Generic, List
 
 from asap.foods.food import Food
 from asap.pets import Pet
@@ -29,6 +30,15 @@ class Item(Generic[ItemType]):
 class PetItem(Item[Pet]):
     def __init__(self, item: Pet, price: int):
         super().__init__(item, price)
+
+
+class HigherTierPetItem(PetItem):
+    def __init__(self, pet_item: PetItem):
+        super().__init__(item=pet_item.item, price=pet_item.price)
+        self.related_items = []
+
+    def add_related_items(self, related_items: List[typing.Self]):
+        self.related_items = related_items
 
 
 class FoodItem(Item[Food]):

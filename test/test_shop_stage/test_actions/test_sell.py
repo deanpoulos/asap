@@ -1,7 +1,7 @@
 import pytest
 
 from asap.actions import ActionSellPet, ActionBuyAndPlacePet
-from asap.engine.action_processor._errors import PositionNotOccupiedError
+from asap.engine.shop.action_processor._errors import PositionNotOccupiedError
 from asap.pets import Duck
 from asap.shop.sell import sell_price_pet
 from asap.shop.settings import DEFAULT_BUY_PRICE

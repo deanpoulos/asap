@@ -6,3 +6,4 @@ from asap.team.team import Team
 @dataclass
 class TeamBattleState:
     team: Team
+    other_team: Team

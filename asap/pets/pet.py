@@ -1,5 +1,7 @@
+from typing import List, Callable, Dict, Any
+
 from asap.abilities import Ability
-from asap.engine.subscribers.pet_subscriber import PetSubscriber
+from asap.engine.shop.subscribers.pet_subscriber import PetSubscriber
 from asap.perks import Perk
 
 
@@ -13,7 +15,10 @@ class Pet:
     def __init__(self):
         self._extra_attack = 0
         self._extra_health = 0
+        self._temp_attack = 0
+        self._temp_health = 0
         self._subscriber = None
+        self._queued_events: Dict[Callable, List[Callable[[Any], None]]] = {self.on_hurt: []}
 
     @property
     def extra_attack(self) -> int:
@@ -21,14 +26,20 @@ class Pet:
 
     @extra_attack.setter
     def extra_attack(self, value: int):
-        value = min(value, MAX_ATTACK - self.attack)
+        # value = min(value, MAX_ATTACK - self.attack)
         self._extra_attack = value
 
     @property
+    def temp_attack(self) -> int:
+        return self._temp_attack
+
+    @temp_attack.setter
+    def temp_attack(self, value: int):
+        self._temp_attack = value
+
+    @property
     def attack(self) -> int:
-        return (self._attack +
-                self._extra_attack +
-                self._exp)
+        return min(MAX_ATTACK, self._attack + self._temp_attack + self._extra_attack + self._exp)
 
     @property
     def extra_health(self) -> int:
@@ -36,14 +47,20 @@ class Pet:
 
     @extra_health.setter
     def extra_health(self, value: int):
-        value = min(value, MAX_HEALTH - self.attack)
+        # value = min(value, MAX_HEALTH - self.attack)
         self._extra_health = value
 
     @property
+    def temp_health(self) -> int:
+        return self._temp_health
+
+    @temp_health.setter
+    def temp_health(self, value: int):
+        self._temp_health = value
+
+    @property
     def health(self) -> int:
-        return (self._health +
-                self._extra_health +
-                self._exp)
+        return min(MAX_HEALTH, self._health + self._temp_health + self._extra_health + self._exp)
 
     @property
     def ability(self) -> Ability:
@@ -66,6 +83,38 @@ class Pet:
 
     def on_buy(self, state):
         self.ability.on_buy(state)
+
+    def hurt(self, value: int, state):
+        self.extra_health -= value
+        self.on_hurt(state)
+
+    def on_hurt(self, state):
+        def _delayed_on_hurt(state):
+            return self._on_hurt(state)
+        self._queued_events[self.on_hurt].append(_delayed_on_hurt)
+
+    def on_faint(self, state):
+        self.ability.on_faint(state)
+        for i in state.team.pets:
+            if state.team.pets[i] == self:
+                pet_position = i
+        state.team.remove_pet(pet_position)
+
+    def trigger_delayed_event(self, event: Callable, state):
+        for event in self._queued_events[event]:
+            event(state)
+
+    def _on_hurt(self, state):
+        self.ability.on_hurt(state)
+
+    def on_friend_summoned(self, friend):
+        self.ability.on_friend_summoned(friend)
+
+    def on_start_battle(self, state):
+        self.ability.on_start_of_battle(state)
+
+    def on_end_turn(self, state):
+        self.ability.on_end_turn(state)
 
     def add_subscriber(self, subscriber: PetSubscriber):
         self._subscriber = subscriber

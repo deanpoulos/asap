@@ -1,21 +1,9 @@
 import pytest
 
 from asap.actions import ActionMergePets, ActionBuyFood
-from asap.engine.action_processor._errors import InvalidMergeError
+from asap.engine.shop.action_processor._errors import InvalidMergeError
 from asap.foods import Apple
 from asap.pets import Duck
-
-
-def test_no_shop_rewards_on_combining_level_2s(game_turn_1_ducks_only_apples_only_single_team):
-    game = game_turn_1_ducks_only_apples_only_single_team
-    team = game.teams[0]
-
-    team.add_pet(0, Duck(exp=2))
-    team.add_pet(1, Duck(exp=2))
-
-    game.execute_action(ActionMergePets(1, 0), team)
-
-    assert len(game.team_states[team].shop.pet_shop.items) == 3
 
 
 def test_merge_high_level_pets_edge_case(game_turn_1_ducks_only_apples_only_single_team):

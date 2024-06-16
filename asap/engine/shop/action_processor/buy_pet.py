@@ -1,7 +1,7 @@
 from asap.actions import ActionBuyAndPlacePet, ActionBuyAndMergePet
 from asap.pets import Pet
 from asap.shop.pet_shop import PetShop
-from asap.team import TeamShopState
+from asap.team.states import TeamShopState
 
 
 def buy_pet(team_shop_state: TeamShopState,

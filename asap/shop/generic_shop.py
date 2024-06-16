@@ -2,7 +2,7 @@ import abc
 import copy
 from typing import Generic, List, Type
 
-from asap.shop.item import ItemType, Item
+from asap.shop.item import ItemType, Item, HigherTierPetItem
 from asap.shop.generic_items_dict import ItemsDict
 
 
@@ -22,6 +22,8 @@ class GenericShop(Generic[ItemType]):
 
     def buy(self, index: int) -> ItemType:
         bought_item = self._items[index].item
+        if isinstance(self._items[index], HigherTierPetItem):
+            self._items = {k: v if v not in self._items[index].related_items else None for k, v in self._items.items()}
         self._items[index] = None
 
         return bought_item

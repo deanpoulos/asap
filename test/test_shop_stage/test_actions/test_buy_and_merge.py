@@ -1,7 +1,7 @@
 import pytest
 
 from asap.actions import ActionBuyAndMergePet
-from asap.engine.action_processor._errors import InvalidBuyMergeError
+from asap.engine.shop.action_processor._errors import InvalidBuyMergeError
 from asap.pets import Duck
 
 

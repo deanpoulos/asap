@@ -1,7 +1,7 @@
 from .food_shop import FoodShop
 from .pet_shop import PetShop
 from .settings import SettingsPetShop, SettingsFoodShop
-from ..engine.subscribers.pet_subscriber import PetSubscriber
+from ..engine.shop.subscribers.pet_subscriber import PetSubscriber
 
 
 class Shop(PetSubscriber):

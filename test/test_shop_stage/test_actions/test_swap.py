@@ -1,7 +1,7 @@
 import pytest
 
 from asap.actions import ActionSwapPets
-from asap.engine.action_processor._errors import InvalidSwapError
+from asap.engine.shop.action_processor._errors import InvalidSwapError
 from asap.pets import Duck
 
 

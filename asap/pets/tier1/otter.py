@@ -19,6 +19,9 @@ class Otter(Pet):
 
 class OtterAbility(Ability):
     def on_sell(self, state):
+        self.use_ability(state)
+
+    def use_ability(self, state):
         from asap.team.states import TeamShopState
         state: TeamShopState
 

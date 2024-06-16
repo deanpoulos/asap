@@ -1,8 +1,8 @@
 from asap.actions import ActionMergePets
 
-from asap.engine.action_processor._errors import InvalidMergeError
-from asap.engine.action_processor.merge_pets import merge_pets
-from asap.team import Team
+from asap.engine.shop.action_processor._errors import InvalidMergeError
+from asap.engine.shop.action_processor.merge_pets import merge_pets
+from asap.team.team import Team
 
 
 def process_merge_pets(action: ActionMergePets, team: Team, game):

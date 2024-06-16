@@ -3,7 +3,7 @@ from random import choice
 from typing import List, Type
 
 from asap.pets import Pet
-from asap.shop.item import PetItem
+from asap.shop.item import PetItem, HigherTierPetItem
 from asap.shop.settings import SettingsPetShop
 from asap.shop.generic_items_dict import PetItemsDict
 from asap.shop.generic_shop import GenericShop
@@ -60,8 +60,14 @@ class PetShop(GenericShop[Pet]):
     def add_higher_tier_options(self, turn: int):
         higher_tier_turn_equivalent = turn + 2
         item_pool = self.shop_pool(turn=higher_tier_turn_equivalent, exclusive=True)
+        higher_tier_pet_items = [
+            HigherTierPetItem(self.roll_new_item(item_pool)) for _ in range(self.settings.NUM_HIGHER_TIER_UNLOCKS)
+        ]
+        for item in higher_tier_pet_items:
+            item.add_related_items([related_item for related_item in higher_tier_pet_items if related_item != item])
+
         higher_tier_options = {
-            i: self.roll_new_item(item_pool)
+            i: higher_tier_pet_items[i]
             for i in range(self.settings.NUM_HIGHER_TIER_UNLOCKS)
         }
         current_shop_pushed_back = {

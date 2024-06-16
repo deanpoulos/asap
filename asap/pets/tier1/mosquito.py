@@ -4,8 +4,8 @@ from asap.abilities import Ability
 from asap.pets.pet import Pet
 
 
-class Beaver(Pet):
-    base_attack = 3
+class Mosquito(Pet):
+    base_attack = 2
     base_health = 2
 
     def __init__(self, attack: int = base_attack, health: int = base_health, exp: int = 0):
@@ -13,23 +13,23 @@ class Beaver(Pet):
         self._attack = attack
         self._health = health
         self._exp = exp
-        self._ability = BeaverAbility(self)
+        self._ability = MosquitoAbility(self)
         self._perk = None
 
 
-class BeaverAbility(Ability):
-    def on_sell(self, state):
+class MosquitoAbility(Ability):
+    def on_start_of_battle(self, state):
         self.use_ability(state)
 
     def use_ability(self, state):
-        from asap.team.states import TeamShopState
-        state: TeamShopState
+        from asap.team.states.battle import TeamBattleState
+        state: TeamBattleState
 
-        other_pets_in_team = [pet for pet in state.team.pets.values() if pet is not None and pet != self.parent]
+        other_pets = [p for p in state.other_team.pets.values() if p is not None and p.health > 0]
         target_pets = random.sample(
-            population=other_pets_in_team,
-            k=min(2, len(other_pets_in_team))
+            population=other_pets,
+            k=min(self.parent.level, len(other_pets))
         )
 
         for target_pet in target_pets:
-            target_pet.extra_attack += self.parent.level
+            target_pet.hurt(1, state)

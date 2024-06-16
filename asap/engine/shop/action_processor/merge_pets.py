@@ -1,5 +1,5 @@
 from asap.pets import Pet
-from asap.team import TeamShopState
+from asap.team.states import TeamShopState
 
 
 def merge_pets(giving_pet: Pet, receiving_pet: Pet, state: TeamShopState):

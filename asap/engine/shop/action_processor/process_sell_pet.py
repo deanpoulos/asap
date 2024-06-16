@@ -1,7 +1,7 @@
 from asap.actions import ActionSellPet
-from asap.engine.action_processor._errors import *
+from asap.engine.shop.action_processor._errors import *
 from asap.shop.sell import sell_price_pet
-from asap.team import Team
+from asap.team.team import Team
 
 
 def process_sell_pet(action: ActionSellPet, team: Team, game):

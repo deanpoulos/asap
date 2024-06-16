@@ -1,6 +1,6 @@
 from asap.actions import ActionFreezePet
-from asap.engine.action_processor._errors import *
-from asap.team import Team
+from asap.engine.shop.action_processor._errors import *
+from asap.team.team import Team
 
 
 def process_freeze_pet(action: ActionFreezePet, team: Team, game):

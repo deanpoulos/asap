@@ -5,7 +5,10 @@ class Ability:
         self.parent = parent
         pass
 
-    def on_start_of_battle(self):
+    def use_ability(self, state):
+        pass
+
+    def on_start_of_battle(self, state):
         pass
 
     def on_end_turn(self, state):
@@ -17,11 +20,14 @@ class Ability:
     def on_sell(self, state):
         pass
 
+    def on_friend_summoned(self, friend):
+        pass
+
     def on_level(self, state):
         pass
 
-    def on_faint(self):
+    def on_faint(self, state):
         pass
 
-    def on_hurt(self):
+    def on_hurt(self, state):
         pass

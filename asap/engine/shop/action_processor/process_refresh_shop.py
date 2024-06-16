@@ -1,7 +1,7 @@
 from asap.actions import ActionRefreshShop
-from asap.engine.action_processor._errors import *
-from asap.engine.action_validator.validate_refresh_shop import validate_refresh_shop
-from asap.team import Team
+from asap.engine.shop.action_processor._errors import *
+from asap.engine.shop.action_validator.validate_refresh_shop import validate_refresh_shop
+from asap.team.team import Team
 
 
 def process_refresh_shop(_: ActionRefreshShop, team: Team, game):

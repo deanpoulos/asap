@@ -19,6 +19,9 @@ class Fish(Pet):
 
 class FishAbility(Ability):
     def on_level(self, state):
+        self.use_ability(state)
+
+    def use_ability(self, state):
         from asap.team.states import TeamShopState
         state: TeamShopState
 

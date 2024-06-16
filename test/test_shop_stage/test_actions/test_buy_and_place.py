@@ -1,7 +1,7 @@
 import pytest
 
 from asap.actions import ActionBuyAndPlacePet, ActionRefreshShop, ActionBuyFood
-from asap.engine.action_processor._errors import PositionOccupiedError, AlreadyBoughtError, NotEnoughMoneyError
+from asap.engine.shop.action_processor._errors import PositionOccupiedError, AlreadyBoughtError, NotEnoughMoneyError
 from asap.engine.game_settings import DEFAULT_ROLL_PRICE
 from asap.shop.settings import DEFAULT_BUY_PRICE
 from asap.engine.game_settings import DEFAULT_STARTING_MONEY as STARTING_MONEY

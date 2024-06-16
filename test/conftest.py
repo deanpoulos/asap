@@ -10,6 +10,19 @@ from asap.shop.settings import SettingsPetShop, SettingsFoodShop
 
 
 @pytest.fixture()
+def game_turn_1_2_teams():
+    settings_pet_shop = SettingsPetShop(TIER_2_PETS=[Duck])
+    settings_food_shop = SettingsFoodShop(TIER_1_FOODS=[Apple])
+
+    game_settings = GameSettings(
+        settings_pet_shop=settings_pet_shop,
+        settings_food_shop=settings_food_shop,
+        starting_turn=1
+    )
+    return Game(num_teams=2, settings=game_settings)
+
+
+@pytest.fixture()
 def game_turn_1_ducks_only_apples_only_single_team():
     settings_pet_shop = SettingsPetShop(TIER_1_PETS=[Duck])
     settings_food_shop = SettingsFoodShop(TIER_1_FOODS=[Apple])

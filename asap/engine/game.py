@@ -4,21 +4,23 @@ import sys
 from typing import List, Dict, Optional
 
 from asap.actions import *
-from asap.engine.action_processor.process_buy_food import process_buy_food
-from asap.engine.action_processor.process_buy_and_place_pet import process_buy_and_place_pet
-from asap.engine.action_processor.process_buy_and_merge_pet import process_buy_and_merge_pet
-from asap.engine.action_processor.process_freeze_food import process_freeze_food
-from asap.engine.action_processor.process_freeze_pet import process_freeze_pet
-from asap.engine.action_processor.process_merge_pets import process_merge_pets
-from asap.engine.action_processor.process_refresh_shop import process_refresh_shop
-from asap.engine.action_processor.process_sell_pet import process_sell_pet
-from asap.engine.action_processor.process_swap_pets import process_swap_pets
-from asap.engine.action_processor.process_unfreeze_food import process_unfreeze_food
-from asap.engine.action_processor.process_unfreeze_pet import process_unfreeze_pet
-from asap.engine.action_validator.validate_refresh_shop import validate_refresh_shop
+from asap.engine.shop.action_processor.process_buy_food import process_buy_food
+from asap.engine.shop.action_processor.process_buy_and_place_pet import process_buy_and_place_pet
+from asap.engine.shop.action_processor.process_buy_and_merge_pet import process_buy_and_merge_pet
+from asap.engine.shop.action_processor.process_end_turn import process_end_turn
+from asap.engine.shop.action_processor.process_freeze_food import process_freeze_food
+from asap.engine.shop.action_processor.process_freeze_pet import process_freeze_pet
+from asap.engine.shop.action_processor.process_merge_pets import process_merge_pets
+from asap.engine.shop.action_processor.process_refresh_shop import process_refresh_shop
+from asap.engine.shop.action_processor.process_sell_pet import process_sell_pet
+from asap.engine.shop.action_processor.process_swap_pets import process_swap_pets
+from asap.engine.shop.action_processor.process_unfreeze_food import process_unfreeze_food
+from asap.engine.shop.action_processor.process_unfreeze_pet import process_unfreeze_pet
+from asap.engine.shop.action_validator.validate_refresh_shop import validate_refresh_shop
 from asap.engine.game_settings import GameSettings
 from asap.shop.shop import Shop
-from asap.team import Team, TeamShopState
+from asap.team.states import TeamShopState
+from asap.team.team import Team
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -73,6 +75,8 @@ class Game:
             process_buy_and_merge_pet(action, team, self)
         elif isinstance(action, ActionSwapPets):
             process_swap_pets(action, team, self)
+        elif isinstance(action, ActionEndTurn):
+            process_end_turn(action, team, self)
         else:
             raise NotImplementedError()
 

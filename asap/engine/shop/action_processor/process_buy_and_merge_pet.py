@@ -1,8 +1,8 @@
 from asap.actions import ActionBuyAndMergePet
-from asap.engine.action_processor.buy_pet import buy_pet
-from asap.engine.action_processor._errors import *
-from asap.engine.action_processor.merge_pets import merge_pets
-from asap.team import Team
+from asap.engine.shop.action_processor.buy_pet import buy_pet
+from asap.engine.shop.action_processor._errors import *
+from asap.engine.shop.action_processor.merge_pets import merge_pets
+from asap.team.team import Team
 
 
 def process_buy_and_merge_pet(action: ActionBuyAndMergePet, team: Team, game):
