@@ -5,6 +5,7 @@ from asap.engine.action_processor._errors import PositionNotOccupiedError
 from asap.pets import Duck
 from asap.shop.sell import sell_price_pet
 from asap.shop.settings import DEFAULT_BUY_PRICE
+from asap.engine.game_settings import DEFAULT_STARTING_MONEY as STARTING_MONEY
 
 
 def test_sell_high_level_pet(game_turn_1_ducks_only_apples_only_single_team):

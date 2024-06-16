@@ -1,41 +1,38 @@
 # food_icon.py
-from PIL import Image, ImageDraw, ImageFont, ImageTk
 import tkinter as tk
-from asap.ui.drawing_utils import fetch_image, overlay_freeze_icon, create_ellipse
+from PIL import Image, ImageTk
 
-def create_food_icon(food, frozen=False):
-    food_name = type(food.item).__name__
-    food_image = fetch_image(food_name)
+from asap.ui.drawing_utils import create_ellipse, fetch_image
 
-    # Calculate padding
-    margin = 5
-    max_diameter = 30  # Reduced size of circles by 25%
-    radius = max_diameter // 2 + margin
 
-    # Create a new image with padding
-    new_size = (food_image.width + radius * 2, food_image.height + radius * 2)
-    new_image = Image.new("RGBA", new_size, (255, 255, 255, 0))
-    new_image.paste(food_image, (radius, radius))
-
-    if frozen:
-        new_image = overlay_freeze_icon(new_image)
-
-    draw = ImageDraw.Draw(new_image)
-    font = ImageFont.truetype("arial", 18)  # Adjust font size
-
-    # Draw price in yellow bubble
-    price_center = (new_size[0] - (radius + margin), radius)
-    create_ellipse(draw, price_center, radius, str(food.price), font, "yellow", "black")
-
-    return ImageTk.PhotoImage(new_image)
-
-class FoodIcon(tk.Canvas):
-    def __init__(self, master, food, frozen=False, on_click=None, **kwargs):
-        super().__init__(master, bg="black", highlightthickness=0, **kwargs)
-        self.food_image = create_food_icon(food, frozen=frozen)
-        self.create_image(0, 0, image=self.food_image, anchor="nw")
+class FoodIcon(tk.Label):
+    def __init__(self, master, food, frozen=False, on_click=None, width=150, height=150, **kwargs):
+        super().__init__(master, **kwargs)
         self.food = food
+        self.price = food.price
         self.frozen = frozen
+        self.width = width
+        self.height = height
+
+        # Fetch and resize food image
+        food_image = fetch_image(type(food.item).__name__)
+        food_image = food_image.resize((self.width, self.height), Image.Resampling.LANCZOS)
+
+        # Draw additional info on the food image
+        self.draw_additional_info(food_image)
+
+        self.food_image = ImageTk.PhotoImage(food_image)
+        self.configure(image=self.food_image, bg='#8a9eb0')
 
         if on_click:
             self.bind("<Button-1>", on_click)
+
+    def draw_additional_info(self, image):
+        create_ellipse(image, text=str(self.price), fill="yellow", outline="black", x=0.8 * self.width,
+                       y=0.2 * self.height)
+        if self.frozen:
+            self.create_frozen_overlay(image)
+
+    def create_frozen_overlay(self, image):
+        overlay = Image.new('RGBA', (self.width, self.height), (0, 0, 255, 128))
+        image.paste(overlay, (0, 0), overlay)

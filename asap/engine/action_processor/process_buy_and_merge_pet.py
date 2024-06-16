@@ -31,6 +31,7 @@ def process_buy_and_merge_pet(action: ActionBuyAndMergePet, team: Team, game):
 
     giving_pet = buy_pet(team_shop_state, shop, action)
     receiving_pet = team.pets[action.pet_position]
-    merge_pets(giving_pet, receiving_pet)
+
+    merge_pets(giving_pet, receiving_pet, team_shop_state)
 
     receiving_pet.on_buy(team_shop_state)

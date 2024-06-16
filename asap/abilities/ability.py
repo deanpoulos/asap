@@ -1,7 +1,8 @@
 
 
 class Ability:
-    def __init__(self):
+    def __init__(self, parent: 'Pet'):
+        self.parent = parent
         pass
 
     def on_start_of_battle(self):
@@ -14,6 +15,9 @@ class Ability:
         pass
 
     def on_sell(self, state):
+        pass
+
+    def on_level(self, state):
         pass
 
     def on_faint(self):

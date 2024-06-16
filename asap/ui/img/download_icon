@@ -1,5 +1,5 @@
 #!/bin/bash
-# e.g. ./download_icon Apple Duck
+# e.g. ./download_icon Apple Duc
 
 # Ensure that the required tools are installed
 if ! command -v wget &> /dev/null || ! command -v grep &> /dev/null || ! command -v sed &> /dev/null

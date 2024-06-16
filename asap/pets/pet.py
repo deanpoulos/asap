@@ -5,6 +5,9 @@ from asap.perks import Perk
 
 LEVEL_2_EXP = 2
 LEVEL_3_EXP = 5
+MAX_HEALTH = 50
+MAX_ATTACK = 50
+
 
 class Pet:
     def __init__(self):
@@ -18,6 +21,7 @@ class Pet:
 
     @extra_attack.setter
     def extra_attack(self, value: int):
+        value = min(value, MAX_ATTACK - self.attack)
         self._extra_attack = value
 
     @property
@@ -32,6 +36,7 @@ class Pet:
 
     @extra_health.setter
     def extra_health(self, value: int):
+        value = min(value, MAX_HEALTH - self.attack)
         self._extra_health = value
 
     @property
@@ -65,12 +70,24 @@ class Pet:
     def add_subscriber(self, subscriber: PetSubscriber):
         self._subscriber = subscriber
 
-    def add_1_exp(self):
+    def add_exp(self, value: int, state):
+        if self.exp == LEVEL_3_EXP:
+            raise Exception()
+        dont_trigger_on_level = False
+        if self.level == 2 and value >= LEVEL_2_EXP:
+            # no rewards for merging two level 2 pets
+            dont_trigger_on_level = True
+        for _ in range(min(value, LEVEL_3_EXP - self._exp)):
+            self._add_one_exp(state, dont_trigger_on_level)
+
+    def _add_one_exp(self, state, dont_trigger_on_level: bool):
         if self._exp < LEVEL_3_EXP:
+            about_to_level_up = self._exp in [LEVEL_2_EXP-1, LEVEL_3_EXP-1]
+            if about_to_level_up and not dont_trigger_on_level:
+                self.ability.on_level(state)
+                if self._subscriber is not None:
+                    self._subscriber.notify_level_change()
             self._exp += 1
-            if (self._subscriber is not None and
-                self._exp in [LEVEL_2_EXP, LEVEL_3_EXP]):
-                self._subscriber.notify_level_change()
         else:
             raise Exception()
 

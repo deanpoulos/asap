@@ -3,14 +3,52 @@ from PIL import Image, ImageDraw, ImageFont
 import importlib.resources as pkg_resources
 from asap.ui import img
 
-def create_ellipse(draw, center, radius, text, font, color, text_color):
-    x, y = center
-    draw.ellipse([(x - radius, y - radius), (x + radius, y + radius)], fill=color)
-    text_bbox = draw.textbbox((0, 0), text, font=font)
-    text_x = x - (text_bbox[2] - text_bbox[0]) // 2
-    text_y = y - (text_bbox[3] - text_bbox[1]) // 2
-    draw.text((text_x, text_y), text, fill=text_color, font=font)
 
+def create_ellipse(image, text, x, y, fill, outline="black", radius=15, margin=5):
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.load_default()
+
+    # Calculate bounding box for ellipse
+    left = x - radius
+    top = y - radius
+    right = x + radius
+    bottom = y + radius
+
+    # Draw ellipse
+    draw.ellipse([left, top, right, bottom], fill=fill, outline=outline)
+
+    # Calculate text size and position
+    text_bbox = draw.textbbox((0, 0), text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    text_x = x - text_width / 2
+    text_y = y - text_height / 2
+
+    # Draw text
+    draw.text((text_x, text_y), text, fill="black", font=font)
+
+def create_rectangle(image, text, x, y, width, height, fill, outline="black"):
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.load_default()
+
+    # Calculate bounding box for rectangle
+    left = x
+    top = y
+    right = x + width
+    bottom = y + height
+
+    # Draw rectangle
+    draw.rectangle([left, top, right, bottom], fill=fill, outline=outline)
+
+    # Calculate text size and position
+    text_bbox = draw.textbbox((0, 0), text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    text_x = x + (width - text_width) / 2
+    text_y = y + (height - text_height) / 2
+
+    # Draw text
+    draw.text((text_x, text_y), text, fill="black", font=font)
 
 def fetch_image(image_name):
     img_path = pkg_resources.path(img, f'{image_name}.png')

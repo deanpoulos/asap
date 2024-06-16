@@ -28,8 +28,8 @@ def process_merge_pets(action: ActionMergePets, team: Team, game):
     giving_pet = team.pets[action.position_from]
     receiving_pet = team.pets[action.position_to]
 
-    merge_pets(giving_pet, receiving_pet)
-
     team.remove_pet(action.position_from)
+
+    merge_pets(giving_pet, receiving_pet, game.team_states[team])
 
 

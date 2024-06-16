@@ -1,7 +1,8 @@
 from asap.pets import Pet
+from asap.team import TeamShopState
 
 
-def merge_pets(giving_pet: Pet, receiving_pet: Pet):
+def merge_pets(giving_pet: Pet, receiving_pet: Pet, state: TeamShopState):
     """ leaves `giving_pet` unchanged, merged pet is modified `receiving_pet`. """
 
     # combine stats by taking max of each from both pet
@@ -9,7 +10,4 @@ def merge_pets(giving_pet: Pet, receiving_pet: Pet):
     receiving_pet.extra_attack = max(giving_pet.extra_attack, receiving_pet.extra_attack)
 
     # combine exp
-    for _ in range(giving_pet.exp + 1):
-        if receiving_pet.exp == 5:
-            continue
-        receiving_pet.add_1_exp()
+    receiving_pet.add_exp(giving_pet.exp + 1, state)
