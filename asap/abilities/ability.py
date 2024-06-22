@@ -1,3 +1,6 @@
+from typing import List
+
+from asap.events.event import Event
 
 
 class Ability:
@@ -8,8 +11,8 @@ class Ability:
     def use_ability(self, state):
         pass
 
-    def on_start_of_battle(self, state):
-        pass
+    def on_start_of_battle(self, state) -> List[Event]:
+        return []
 
     def on_end_turn(self, state):
         pass
@@ -29,5 +32,5 @@ class Ability:
     def on_faint(self, state):
         pass
 
-    def on_hurt(self, state):
-        pass
+    def on_hurt(self, state) -> List[Event]:
+        return []

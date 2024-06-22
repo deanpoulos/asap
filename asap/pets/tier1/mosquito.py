@@ -1,6 +1,8 @@
 import random
+from typing import List
 
 from asap.abilities import Ability
+from asap.events.event import Event
 from asap.pets.pet import Pet
 
 
@@ -19,9 +21,9 @@ class Mosquito(Pet):
 
 class MosquitoAbility(Ability):
     def on_start_of_battle(self, state):
-        self.use_ability(state)
+        return self.use_ability(state)
 
-    def use_ability(self, state):
+    def use_ability(self, state) -> List[Event]:
         from asap.team.states.battle import TeamBattleState
         state: TeamBattleState
 
@@ -31,5 +33,8 @@ class MosquitoAbility(Ability):
             k=min(self.parent.level, len(other_pets))
         )
 
+        events = []
         for target_pet in target_pets:
-            target_pet.hurt(1, state)
+            events.extend(target_pet.hurt(1, state))
+
+        return events

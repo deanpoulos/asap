@@ -36,5 +36,8 @@ class Team:
             if pet is not None:
                 pet.on_end_turn(state)
 
+    def is_alive(self):
+        return any([pet.health > 0 for pet in self.pets.values()])
+
     def __str__(self):
         return " ".join([f"{pet} " for position, pet in self.pets.items()])

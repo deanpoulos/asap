@@ -2,6 +2,7 @@ from typing import List, Callable, Dict, Any
 
 from asap.abilities import Ability
 from asap.engine.shop.subscribers.pet_subscriber import PetSubscriber
+from asap.events.event import Event
 from asap.perks import Perk
 
 
@@ -18,7 +19,6 @@ class Pet:
         self._temp_attack = 0
         self._temp_health = 0
         self._subscriber = None
-        self._queued_events: Dict[Callable, List[Callable[[Any], None]]] = {self.on_hurt: []}
 
     @property
     def extra_attack(self) -> int:
@@ -84,14 +84,12 @@ class Pet:
     def on_buy(self, state):
         self.ability.on_buy(state)
 
-    def hurt(self, value: int, state):
+    def hurt(self, value: int, state) -> List[Event]:
         self.extra_health -= value
-        self.on_hurt(state)
+        return self.on_hurt(state)
 
-    def on_hurt(self, state):
-        def _delayed_on_hurt(state):
-            return self._on_hurt(state)
-        self._queued_events[self.on_hurt].append(_delayed_on_hurt)
+    def on_hurt(self, state) -> List[Event]:
+        return self._ability.on_hurt(state)
 
     def on_faint(self, state):
         self.ability.on_faint(state)
@@ -100,18 +98,11 @@ class Pet:
                 pet_position = i
         state.team.remove_pet(pet_position)
 
-    def trigger_delayed_event(self, event: Callable, state):
-        for event in self._queued_events[event]:
-            event(state)
-
-    def _on_hurt(self, state):
-        self.ability.on_hurt(state)
-
     def on_friend_summoned(self, friend):
         self.ability.on_friend_summoned(friend)
 
-    def on_start_battle(self, state):
-        self.ability.on_start_of_battle(state)
+    def on_start_battle(self, state) -> List[Event]:
+        return self.ability.on_start_of_battle(state)
 
     def on_end_turn(self, state):
         self.ability.on_end_turn(state)
