@@ -75,7 +75,7 @@ class GameUI(tk.Tk):
         team_state = self.game.team_states[self.team]
 
         # Update info banner
-        self.info_banner.update(money=team_state.money, health=self.team.health, turn=team_state.shop.turn)
+        self.info_banner.update(money=team_state.money, health=team_state.health, turn=team_state.shop.turn)
 
         # Update team display
         for widget in self.team_frame.winfo_children():

@@ -33,7 +33,7 @@ class Game:
         self.teams: List[Team] = []
 
         for _ in range(num_teams):
-            self.teams.append(Team(settings.max_team_size, settings.starting_team_health))
+            self.teams.append(Team(settings.max_team_size))
         self.team_states: Dict[Team, TeamShopState] = {}
 
         for team in self.teams:
@@ -43,7 +43,7 @@ class Game:
                 roll_price=settings.roll_price,
                 turn=self.settings.starting_turn
             )
-            self.team_states[team] = TeamShopState(team, settings.starting_money, shop)
+            self.team_states[team] = TeamShopState(team, settings.starting_money, settings.starting_team_health, 0, shop)
             shop.refresh()
 
     def _check_for_winner(self):

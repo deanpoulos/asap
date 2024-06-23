@@ -8,4 +8,6 @@ from asap.team.team import Team
 class TeamShopState:
     team: Team
     money: int
+    health: int
+    wins: int = 0
     shop: Shop = field(default_factory=Shop)

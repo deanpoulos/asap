@@ -14,4 +14,3 @@ class ZombieCricket(Pet):
         self._exp = 0
         self._ability = NullAbility(self)
         self._perk = None
-

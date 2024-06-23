@@ -132,7 +132,6 @@ def test_battle_honey_cricket_lvl2_horse_otter_vs_lvl3_ant_ant(game_turn_1_2_tea
     team_r.add_pet(0, Ant(exp=LEVEL_3_EXP))
     team_r.add_pet(1, Ant())
 
-    # seed s.t. first ant changes other ant's stats
     random.seed(0)
     battle = Battle(team_l, team_r)
 

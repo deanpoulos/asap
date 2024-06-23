@@ -64,6 +64,7 @@ def handle_item_use(game_ui, pet_index):
     game_ui.update_display()
 
 def deselect_item(game_ui, event=None):
-    game_ui.selected_item = None
-    game_ui.selected_item_type = None
-    game_ui.update_display()
+    if game_ui.selected_item is not None or game_ui.selected_item_type is not None:
+        game_ui.selected_item = None
+        game_ui.selected_item_type = None
+        game_ui.update_display()
