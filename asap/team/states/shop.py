@@ -9,5 +9,6 @@ class TeamShopState:
     team: Team
     money: int
     health: int
-    wins: int = 0
     shop: Shop = field(default_factory=Shop)
+    previous_battle_outcome: int | None = None
+    wins: int = 0

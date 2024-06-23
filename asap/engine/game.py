@@ -6,7 +6,7 @@ from typing import List, Dict, Optional
 
 from asap.actions import *
 from asap.engine.battle.battle import Battle
-from asap.engine.battle.battle_result import WIN, DRAW, LOSS
+from asap.engine.battle.battle_result import WIN, LOSS
 from asap.engine.shop.action_processor.process_buy_food import process_buy_food
 from asap.engine.shop.action_processor.process_buy_and_place_pet import process_buy_and_place_pet
 from asap.engine.shop.action_processor.process_buy_and_merge_pet import process_buy_and_merge_pet
@@ -19,7 +19,7 @@ from asap.engine.shop.action_processor.process_sell_pet import process_sell_pet
 from asap.engine.shop.action_processor.process_swap_pets import process_swap_pets
 from asap.engine.shop.action_processor.process_unfreeze_food import process_unfreeze_food
 from asap.engine.shop.action_processor.process_unfreeze_pet import process_unfreeze_pet
-from asap.engine.shop.action_validator.validate_refresh_shop import validate_refresh_shop
+# from asap.engine.shop.action_validator.validate_refresh_shop import validate_refresh_shop
 from asap.engine.game_settings import GameSettings
 from asap.shop.shop import Shop
 from asap.team.states import TeamShopState
@@ -46,7 +46,9 @@ class Game:
                 roll_price=settings.roll_price,
                 turn=self.settings.starting_turn
             )
-            self.team_states[team] = TeamShopState(team, settings.starting_money, settings.starting_team_health, 0, shop)
+            self.team_states[team] = TeamShopState(
+                team, settings.starting_money, settings.starting_team_health, shop=shop
+            )
             shop.refresh()
 
     def execute_action(self, action: Action, team: Team):
@@ -87,6 +89,7 @@ class Game:
                     self.team_states[result.team].wins += 1
                 if result.result == LOSS:
                     self.team_states[result.team].health -= 1
+                self.team_states[result.team].previous_battle_outcome = result.result
 
         self._prune_teams()
 
