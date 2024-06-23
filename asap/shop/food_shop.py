@@ -40,3 +40,8 @@ class FoodShop(GenericShop[Food]):
             item_pool.extend(self.settings.TIER_1_FOODS)
 
         return item_pool
+
+    def stock_special_foods(self, foods: List[FoodItem]):
+        special_foods = {i: foods[i] for i in range(len(foods))}
+        current_shop_pushed_back = {k + len(foods): v for k, v in self._items.items()}
+        self._items = {**special_foods, **current_shop_pushed_back}

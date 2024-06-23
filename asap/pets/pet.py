@@ -80,32 +80,68 @@ class Pet:
 
     def on_sell(self, state):
         self.ability.on_sell(state)
+        if self.perk is not None:
+            self.perk.on_sell(state)
 
     def on_buy(self, state):
         self.ability.on_buy(state)
 
-    def hurt(self, value: int, state) -> List[Event]:
+    def hurt(self, value: int, source, state) -> List[Event]:
         self.extra_health -= value
-        return self.on_hurt(state)
+        return self.on_hurt(source, state)
 
-    def on_hurt(self, state) -> List[Event]:
-        return self._ability.on_hurt(state)
+    def on_hurt(self, source, state) -> List[Event]:
+        events = []
+        if self.health <= 0:
+            events.append(Event(type=Event.Type.KNOCKOUT, target=self, source=source))
+        events.extend(self._ability.on_hurt(source, state))
+        if self.perk is not None:
+            events.extend(self.perk.on_hurt(source, state))
+
+        return events
 
     def on_faint(self, state):
-        self.ability.on_faint(state)
         for i in state.team.pets:
             if state.team.pets[i] == self:
                 pet_position = i
+                break
         state.team.remove_pet(pet_position)
+        self.ability.on_faint(pet_position, state)
+        if self.perk is not None:
+            self.perk.on_faint(pet_position, state)
 
     def on_friend_summoned(self, friend):
         self.ability.on_friend_summoned(friend)
+        if self.perk is not None:
+            self.perk.on_friend_summoned(friend)
 
     def on_start_battle(self, state) -> List[Event]:
-        return self.ability.on_start_of_battle(state)
+        events = []
+        events.extend(self.ability.on_start_of_battle(state))
+        if self.perk is not None:
+            events.extend(self.perk.on_start_of_battle(state))
+        return events
 
     def on_end_turn(self, state):
         self.ability.on_end_turn(state)
+        if self.perk is not None:
+            self.perk.on_end_turn(state)
+
+    def before_attack(self, state) -> List[Event]:
+        events = []
+        events.extend(self.ability.before_attack(state))
+        if self.perk is not None:
+            events.extend(self.perk.before_attack(state))
+
+        return events
+
+    def after_attack(self, state) -> List[Event]:
+        events = []
+        events.extend(self.ability.after_attack(state))
+        if self.perk is not None:
+            events.extend(self.perk.after_attack(state))
+
+        return events
 
     def add_subscriber(self, subscriber: PetSubscriber):
         self._subscriber = subscriber

@@ -15,12 +15,7 @@ def test_hurt_and_faint(game_turn_1_2_teams):
     battle = Battle(team_l, team_r)
 
     battle.assign_pet_priorities()
-    battle.phase_start_of_turn()
-
-    # check that the duck has lost one health and is still in team
-    assert battle.team_r.pets[0].health == 0
-
-    battle.phase_trigger_on_hurt_and_faint()
+    battle.phase_start_of_battle()
 
     # check that the duck has fainted and is no longer in team
     assert battle.team_r.pets[0] is None

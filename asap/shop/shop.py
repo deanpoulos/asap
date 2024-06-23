@@ -1,4 +1,7 @@
+from typing import List
+
 from .food_shop import FoodShop
+from .item import FoodItem
 from .pet_shop import PetShop
 from .settings import SettingsPetShop, SettingsFoodShop
 from ..engine.shop.subscribers.pet_subscriber import PetSubscriber
@@ -28,6 +31,9 @@ class Shop(PetSubscriber):
 
     def add_higher_tier_pet_options(self):
         self.pet_shop.add_higher_tier_options(self.turn)
+
+    def stock_special_foods(self, foods: List[FoodItem]):
+        self.food_shop.stock_special_foods(foods)
 
     def buy_pet(self, shop_index: int):
         pet = self.pet_shop.buy(shop_index)

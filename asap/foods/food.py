@@ -5,34 +5,28 @@ from asap.pets import Pet
 
 class Food(ABC):
     @property
-    @abstractmethod
     def attack(self) -> int:
-        pass
+        return self._attack
 
     @attack.setter
-    @abstractmethod
     def attack(self, value: int):
-        pass
+        self._attack = value
 
     @property
-    @abstractmethod
     def health(self) -> int:
-        pass
+        return self._health
 
     @health.setter
-    @abstractmethod
     def health(self, value: int):
-        pass
+        self._health = value
 
     @property
-    @abstractmethod
     def perk(self) -> Perk:
-        pass
+        return self._perk
 
     @perk.setter
-    @abstractmethod
     def perk(self, value: Perk):
-        pass
+        self._perk = value
 
     def on_consume(self, pet: Pet):
         pet.extra_health += self.health

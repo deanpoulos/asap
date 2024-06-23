@@ -3,11 +3,7 @@ from typing import List
 from asap.events.event import Event
 
 
-class Ability:
-    def __init__(self, parent: 'Pet'):
-        self.parent = parent
-        pass
-
+class AbilityBase:
     def use_ability(self, state):
         pass
 
@@ -29,8 +25,21 @@ class Ability:
     def on_level(self, state):
         pass
 
-    def on_faint(self, state):
+    def on_faint(self, pet_position: int, state):
         pass
 
-    def on_hurt(self, state) -> List[Event]:
+    def on_hurt(self, source, state) -> List[Event]:
         return []
+
+    def before_attack(self, state) -> List[Event]:
+        return []
+
+    def after_attack(self, state) -> List[Event]:
+        return []
+
+
+class Ability(AbilityBase):
+    def __init__(self, parent: 'Pet'):
+        self.parent = parent
+        pass
+

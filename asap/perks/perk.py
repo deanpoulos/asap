@@ -1,3 +1,5 @@
-class Perk:
-    def on_hit(self):
-        pass
+from asap.abilities.ability import AbilityBase
+
+
+class Perk(AbilityBase):
+    pass

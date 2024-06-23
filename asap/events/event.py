@@ -8,6 +8,7 @@ class Event:
     class Type(enum.Enum):
         HURT = 1
         FAINT = 2
+        KNOCKOUT = 3
 
     type: Type
     target: 'Pet'

@@ -1,5 +1,5 @@
 #!/bin/bash
-# e.g. ./download_icon Apple Duc
+# e.g. ./download_icon Apple Duck
 
 # Ensure that the required tools are installed
 if ! command -v wget &> /dev/null || ! command -v grep &> /dev/null || ! command -v sed &> /dev/null
@@ -57,7 +57,7 @@ TEMP_PET_PAGE="pet_page.html"
 
 # Iterate over all search terms provided as arguments
 for SEARCH_TERM in "$@"; do
-    OUTPUT_FILE="${SEARCH_TERM// /_}.png"
+    OUTPUT_FILE="${SEARCH_TERM//_/}.png"
 
     # Iterate through the tiers and search both pets and food pages
     for TIER in {1..6}; do
@@ -73,6 +73,14 @@ for SEARCH_TERM in "$@"; do
             break
         fi
     done
+
+    # If no image was found, search directly using the search phrase at the end of the URL
+    if [ ! -f "$OUTPUT_FILE" ]; then
+        MAIN_PAGE_URL="$BASE_URL/wiki/$SEARCH_TERM"
+        if search_and_download "$BASE_URL" "$MAIN_PAGE_URL" "$SEARCH_TERM" "$TEMP_MAIN_PAGE" "$TEMP_PET_PAGE" "$OUTPUT_FILE"; then
+            continue
+        fi
+    fi
 
     if [ ! -f "$OUTPUT_FILE" ]; then
         echo "No matching image found for $SEARCH_TERM"
