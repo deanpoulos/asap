@@ -1,9 +1,12 @@
 import logging
+import random
 import sys
 
 from typing import List, Dict, Optional
 
 from asap.actions import *
+from asap.engine.battle.battle import Battle
+from asap.engine.battle.battle_result import WIN, DRAW, LOSS
 from asap.engine.shop.action_processor.process_buy_food import process_buy_food
 from asap.engine.shop.action_processor.process_buy_and_place_pet import process_buy_and_place_pet
 from asap.engine.shop.action_processor.process_buy_and_merge_pet import process_buy_and_merge_pet
@@ -46,12 +49,6 @@ class Game:
             self.team_states[team] = TeamShopState(team, settings.starting_money, settings.starting_team_health, 0, shop)
             shop.refresh()
 
-    def _check_for_winner(self):
-        if len(self.teams) == 1:
-            return True
-        else:
-            return False
-
     def execute_action(self, action: Action, team: Team):
         if isinstance(action, ActionBuyAndPlacePet):
             process_buy_and_place_pet(action, team, self)
@@ -80,9 +77,41 @@ class Game:
         else:
             raise NotImplementedError()
 
-        # logging.debug(f"\nTEAM: {team}\nSHOP: {self.team_states[team].shop}")
+    def play_battle_round(self):
+        pairings = self._make_pairings()
+        for pairing in pairings:
+            battle = Battle(*pairing)
+            results = battle.play()
+            for result in results:
+                if result.result == WIN:
+                    self.team_states[result.team].wins += 1
+                if result.result == LOSS:
+                    self.team_states[result.team].health -= 1
 
-    #
+        self._prune_teams()
+
+    def _make_pairings(self):
+        teams = self.teams[:]
+        random.shuffle(teams)
+
+        if len(teams) % 2 == 1:
+            teams.append(teams[0])
+
+        return [teams[i:i + 2] for i in range(0, len(teams), 2)]
+
+    def _check_for_winner(self):
+        if len(self.teams) == 1:
+            return True
+        else:
+            return False
+
+    def _prune_teams(self):
+        for team in self.teams:
+            team_state = self.team_states[team]
+            if team_state.health <= 0:
+                self.teams.remove(team)
+                self.team_states.pop(team)
+
     # def allowed_actions(self, team: Team):
     #     action_space: Dict[Action, bool] = {}
     #

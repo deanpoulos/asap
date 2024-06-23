@@ -1,3 +1,5 @@
+import random
+
 from asap.actions import ActionEndTurn
 from asap.team.team import Team
 
@@ -12,3 +14,5 @@ def process_end_turn(_: ActionEndTurn, team: Team, game):
     team_shop_state.shop.refresh()
 
     team.end_turn(team_shop_state)
+
+    game.play_battle_round()
