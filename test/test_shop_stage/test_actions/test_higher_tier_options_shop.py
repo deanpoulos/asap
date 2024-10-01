@@ -1,5 +1,5 @@
-from asap.actions import ActionMergePets, ActionBuyAndPlacePet, ActionFreezePet, ActionRefreshShop
-from asap.pets import Duck
+from asap.engine.actions import ActionMergePets, ActionBuyAndPlacePet, ActionFreezePet, ActionRefreshShop
+from asap.engine.pets import Duck
 
 
 def test_paired_higher_tier_shop_items_after_freezing(game_turn_1_ducks_only_apples_only_single_team_with_tier2_dummy):

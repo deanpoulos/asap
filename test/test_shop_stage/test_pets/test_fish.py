@@ -1,5 +1,5 @@
-from asap.actions import ActionMergePets
-from asap.pets import Duck, Fish
+from asap.engine.actions import ActionMergePets
+from asap.engine.pets import Duck, Fish
 
 
 def test_fish_on_level(game_turn_1_ducks_only_apples_only_single_team):

@@ -1,7 +1,7 @@
 import pytest
 
-from asap.actions import ActionFreezePet, ActionUnfreezePet, ActionFreezeFood, ActionUnfreezeFood
-from asap.engine.shop.action_processor._errors import AlreadyFrozenError, AlreadyUnfrozenError
+from asap.engine.actions import ActionFreezePet, ActionUnfreezePet, ActionFreezeFood, ActionUnfreezeFood
+from asap.engine.engine.shop.action_processor._errors import AlreadyFrozenError, AlreadyUnfrozenError
 
 
 def test_freeze_unfreeze_pet(game_turn_1_ducks_only_apples_only_single_team):

@@ -1,9 +1,9 @@
 import pytest
 
-from asap.actions import ActionMergePets, ActionBuyFood
-from asap.engine.shop.action_processor._errors import InvalidMergeError
-from asap.foods import Apple
-from asap.pets import Duck
+from asap.engine.actions import ActionMergePets, ActionBuyFood
+from asap.engine.engine.shop.action_processor._errors import InvalidMergeError
+from asap.engine.foods import Apple
+from asap.engine.pets import Duck
 
 
 def test_merge_high_level_pets_edge_case(game_turn_1_ducks_only_apples_only_single_team):

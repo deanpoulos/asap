@@ -1,5 +1,5 @@
-from asap.actions import *
-from asap.pets import Duck
+from asap.engine.actions import *
+from asap.engine.pets import Duck
 
 
 def test_refresh(game_turn_1_ducks_only_apples_only_single_team_with_tier2_dummy, DummyTier2Pet):

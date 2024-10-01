@@ -1,10 +1,10 @@
 import pytest
 
-from asap.actions import ActionBuyAndPlacePet, ActionRefreshShop, ActionBuyFood
-from asap.engine.shop.action_processor._errors import PositionOccupiedError, AlreadyBoughtError, NotEnoughMoneyError
-from asap.engine.game_settings import DEFAULT_ROLL_PRICE
-from asap.shop.settings import DEFAULT_BUY_PRICE
-from asap.engine.game_settings import DEFAULT_STARTING_MONEY as STARTING_MONEY
+from asap.engine.actions import ActionBuyAndPlacePet, ActionRefreshShop, ActionBuyFood
+from asap.engine.engine.shop.action_processor._errors import PositionOccupiedError, AlreadyBoughtError, NotEnoughMoneyError
+from asap.engine.engine.game_settings import DEFAULT_ROLL_PRICE
+from asap.engine.shop.settings import DEFAULT_BUY_PRICE
+from asap.engine.engine.game_settings import DEFAULT_STARTING_MONEY as STARTING_MONEY
 
 
 def test_buy_pets_and_refresh(game_turn_1_ducks_only_apples_only_single_team):

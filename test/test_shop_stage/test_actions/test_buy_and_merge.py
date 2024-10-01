@@ -1,8 +1,8 @@
 import pytest
 
-from asap.actions import ActionBuyAndMergePet
-from asap.engine.shop.action_processor._errors import InvalidBuyMergeError
-from asap.pets import Duck
+from asap.engine.actions import ActionBuyAndMergePet
+from asap.engine.engine.shop.action_processor._errors import InvalidBuyMergeError
+from asap.engine.pets import Duck
 
 
 def test_buy_and_merge(game_turn_1_ducks_only_apples_only_single_team):

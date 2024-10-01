@@ -1,8 +1,8 @@
 import pytest
 
-from asap.actions import ActionSwapPets
-from asap.engine.shop.action_processor._errors import InvalidSwapError
-from asap.pets import Duck
+from asap.engine.actions import ActionSwapPets
+from asap.engine.engine.shop.action_processor._errors import InvalidSwapError
+from asap.engine.pets import Duck
 
 
 def test_swap_pets(game_turn_1_ducks_only_apples_only_single_team):

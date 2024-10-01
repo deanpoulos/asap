@@ -1,6 +1,6 @@
-from asap.engine.battle.battle import Battle
-from asap.pets import Duck
-from asap.pets.pet import MAX_ATTACK, MAX_HEALTH
+from asap.engine.engine.battle.battle import Battle
+from asap.engine.pets import Duck
+from asap.engine.pets.pet import MAX_ATTACK, MAX_HEALTH
 
 
 def test_pet_prioritization(game_turn_1_2_teams):

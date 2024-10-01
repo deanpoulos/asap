@@ -1,5 +1,5 @@
-from asap.actions import ActionSellPet
-from asap.pets import Duck
+from asap.engine.actions import ActionSellPet
+from asap.engine.pets import Duck
 
 
 def test_duck_on_sell(game_turn_1_ducks_only_apples_only_single_team):

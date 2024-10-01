@@ -2,11 +2,11 @@ from typing import Type
 
 import pytest
 
-from asap.engine.game import Game
-from asap.engine.game_settings import GameSettings
-from asap.foods import Apple
-from asap.pets import Duck, Pet
-from asap.shop.settings import SettingsPetShop, SettingsFoodShop
+from asap.engine.engine.game import Game
+from asap.engine.engine.game_settings import GameSettings
+from asap.engine.foods import Apple
+from asap.engine.pets import Duck, Pet
+from asap.engine.shop.settings import SettingsPetShop, SettingsFoodShop
 
 
 @pytest.fixture()
@@ -15,11 +15,12 @@ def game_turn_1_2_teams():
     settings_food_shop = SettingsFoodShop(TIER_1_FOODS=[Apple])
 
     game_settings = GameSettings(
+        num_teams=2,
         settings_pet_shop=settings_pet_shop,
         settings_food_shop=settings_food_shop,
         starting_turn=1
     )
-    return Game(num_teams=2, settings=game_settings)
+    return Game(settings=game_settings)
 
 
 @pytest.fixture()
@@ -28,11 +29,12 @@ def game_turn_1_ducks_only_apples_only_single_team():
     settings_food_shop = SettingsFoodShop(TIER_1_FOODS=[Apple])
 
     game_settings = GameSettings(
+        num_teams=1,
         settings_pet_shop=settings_pet_shop,
         settings_food_shop=settings_food_shop,
         starting_turn=1
     )
-    return Game(num_teams=1, settings=game_settings)
+    return Game(settings=game_settings)
 
 
 @pytest.fixture()
@@ -41,11 +43,12 @@ def game_turn_1_ducks_only_apples_only_single_team_with_tier2_dummy(DummyTier2Pe
     settings_food_shop = SettingsFoodShop(TIER_1_FOODS=[Apple])
 
     game_settings = GameSettings(
+        num_teams=1,
         settings_pet_shop=settings_pet_shop,
         settings_food_shop=settings_food_shop,
         starting_turn=1
     )
-    return Game(num_teams=1, settings=game_settings)
+    return Game(settings=game_settings)
 
 
 @pytest.fixture()

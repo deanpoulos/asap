@@ -1,5 +1,5 @@
-from asap.pets import Horse, Duck
-from asap.pets.pet import LEVEL_2_EXP, LEVEL_3_EXP
+from asap.engine.pets import Horse, Duck
+from asap.engine.pets.pet import LEVEL_2_EXP, LEVEL_3_EXP
 
 
 def test_horse_on_friend_summoned(game_turn_1_ducks_only_apples_only_single_team):

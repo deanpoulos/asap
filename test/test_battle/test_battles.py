@@ -1,10 +1,10 @@
 import random
 
-from asap.engine.battle.battle import Battle
-from asap.engine.battle.battle_result import TeamBattleResult
-from asap.foods.tier1.honey import HoneyPerk
-from asap.pets import Duck, Mosquito, Cricket, Horse, Pig, Ant, Otter
-from asap.pets.pet import LEVEL_3_EXP, LEVEL_2_EXP
+from asap.engine.engine.battle.battle import Battle
+from asap.engine.engine.battle.battle_result import TeamBattleResult
+from asap.engine.foods.tier1.honey import HoneyPerk
+from asap.engine.pets import Duck, Mosquito, Cricket, Horse, Pig, Ant, Otter
+from asap.engine.pets.pet import LEVEL_3_EXP, LEVEL_2_EXP
 
 
 def test_battle_mosquito_cricket_vs_duck_duck(game_turn_1_2_teams):
