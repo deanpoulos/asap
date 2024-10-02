@@ -22,6 +22,17 @@ from asap.engine.engine.shop.action_processor.process_unfreeze_food import proce
 from asap.engine.engine.shop.action_processor.process_unfreeze_pet import process_unfreeze_pet
 # from asap.engine.engine.shop.action_validator.validate_refresh_shop import validate_refresh_shop
 from asap.engine.engine.game_settings import GameSettings
+from asap.engine.engine.shop.action_validator.validate_buy_and_merge_pet import validate_buy_and_merge_pet
+from asap.engine.engine.shop.action_validator.validate_buy_and_place_pet import validate_buy_and_place_pet
+from asap.engine.engine.shop.action_validator.validate_buy_food import validate_buy_food
+from asap.engine.engine.shop.action_validator.validate_freeze_food import validate_freeze_food
+from asap.engine.engine.shop.action_validator.validate_freeze_pet import validate_freeze_pet
+from asap.engine.engine.shop.action_validator.validate_merge_pets import validate_merge_pets
+from asap.engine.engine.shop.action_validator.validate_refresh_shop import validate_refresh_shop
+from asap.engine.engine.shop.action_validator.validate_sell_pet import validate_sell_pet
+from asap.engine.engine.shop.action_validator.validate_swap_pets import validate_swap_pets
+from asap.engine.engine.shop.action_validator.validate_unfreeze_food import validate_unfreeze_food
+from asap.engine.engine.shop.action_validator.validate_unfreeze_pet import validate_unfreeze_pet
 from asap.engine.shop.shop import Shop
 from asap.engine.team.states import TeamShopState
 from asap.engine.team.team import Team
@@ -85,6 +96,35 @@ class Game:
         else:
             raise NotImplementedError()
 
+    def is_valid_action(self, action: Action, team: Team) -> bool:
+        if isinstance(action, ActionBuyAndPlacePet):
+            return validate_buy_and_place_pet(action, self.team_states[team])
+        elif isinstance(action, ActionBuyFood):
+            return validate_buy_food(action, self.team_states[team])
+        elif isinstance(action, ActionRefreshShop):
+            return validate_refresh_shop(action, self.team_states[team])
+        elif isinstance(action, ActionFreezeFood):
+            return validate_freeze_food(action, self.team_states[team])
+        elif isinstance(action, ActionFreezePet):
+            return validate_freeze_pet(action, self.team_states[team])
+        elif isinstance(action, ActionUnfreezeFood):
+            return validate_unfreeze_food(action, self.team_states[team])
+        elif isinstance(action, ActionUnfreezePet):
+            return validate_unfreeze_pet(action, self.team_states[team])
+        elif isinstance(action, ActionSellPet):
+            return validate_sell_pet(action, self.team_states[team])
+        elif isinstance(action, ActionMergePets):
+            return validate_merge_pets(action, self.team_states[team], self.settings.max_pet_level)
+        elif isinstance(action, ActionBuyAndMergePet):
+            return validate_buy_and_merge_pet(action, self.team_states[team])
+        elif isinstance(action, ActionSwapPets):
+            return validate_swap_pets(action, self.team_states[team])
+        elif isinstance(action, ActionEndTurn):
+            return True
+        else:
+            raise NotImplementedError()
+
+
     def play_battle_round(self):
         pairings = self._make_pairings()
         for pairing in pairings:
@@ -124,19 +164,3 @@ class Game:
             if team_state.health <= 0:
                 self.teams.remove(team)
                 self.team_states.pop(team)
-
-    # def allowed_actions(self, team: Team):
-    #     action_space: Dict[Action, bool] = {}
-    #
-    #     team_shop_state = self.team_states[team]
-    #     pet_shop_settings = self.settings.settings_pet_shop
-    #
-    #     # actions with no input
-    #     action_space[ActionRefreshShop()] = validate_refresh_shop(team_shop_state, team)
-    #
-    #     # actions parameterized by pet shop index input
-    #     shop_index_space = (pet_shop_settings.TIER_6_PET_SHOP_SIZE +
-    #                         pet_shop_settings.NUM_HIGHER_TIER_UNLOCKS*3)
-    #
-    #     for shop_index in range(shop_index_space):
-    #         action_space[ActionFreezePet(shop_index)] = validate_freeze_pet

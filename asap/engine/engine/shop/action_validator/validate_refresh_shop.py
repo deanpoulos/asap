@@ -1,4 +1,4 @@
-def validate_refresh_shop(team_shop_state):
+def validate_refresh_shop(_, team_shop_state):
     shop = team_shop_state.shop
 
     roll_price = shop.roll_price

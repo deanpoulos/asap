@@ -1,13 +1,14 @@
-from typing import SupportsFloat, Any, Dict, Type
+from typing import SupportsFloat, Any, Dict, Type, List
 
 import gymnasium as gym
 from gymnasium.core import ActType, ObsType
 
-from asap.engine.actions import ActionEndTurn
+from asap.engine.actions import ActionEndTurn, Action
 from asap.engine.engine.game import Game
 from asap.engine.engine.game_settings import GameSettings
 from asap.engine.foods import Food
 from asap.engine.pets import Pet
+from asap.environment.action_space import make_possible_actions
 from asap.environment.observation_space import make_pet_observation_map, make_food_observation_map
 
 MAX_ACTIONS_BEFORE_TRUNCATION = 30
@@ -20,8 +21,10 @@ class AsapEnvironmentTwoPlayer(gym.Env[dict, int]):
         self.team_left = self.game.teams[0]
         self.team_right = self.game.teams[1]
         self.action_index: int = 0
-        self._pet_observation_map: Dict[Type[Pet], int] = make_pet_observation_map(game_settings)
-        self._food_observation_map: Dict[Type[Food], int] = make_food_observation_map(game_settings)
+        self.pet_observation_map: Dict[Type[Pet], int] = make_pet_observation_map(game_settings)
+        self.food_observation_map: Dict[Type[Food], int] = make_food_observation_map(game_settings)
+        self.action_map: List[Action] = make_possible_actions(game_settings)
+        self.action_map_inverse: Dict[Action, int] = {action: i for i, action in enumerate(make_possible_actions(game_settings))}
 
     def step(
             self, action: ActType
@@ -31,7 +34,7 @@ class AsapEnvironmentTwoPlayer(gym.Env[dict, int]):
         truncated = False
         reward = 0
 
-        if isinstance(action, ActionEndTurn):
+        if action == self.action_map_inverse[ActionEndTurn()]:
             terminated = True
         elif self.action_index >= MAX_ACTIONS_BEFORE_TRUNCATION:
             truncated = True
@@ -39,10 +42,10 @@ class AsapEnvironmentTwoPlayer(gym.Env[dict, int]):
         if truncated or terminated:
             self.game.execute_action(ActionEndTurn(), self.team_left)
         else:
-            self.game.execute_action(action, self.team_left)
+            self.game.execute_action(self.action_map[action], self.team_left)
             self.action_index += 1
 
-        obs = self._make_observation()
+        obs = self.make_observation()
 
         if self.game.has_winner():
             if self.game.is_winner(self.team_left):
@@ -55,10 +58,10 @@ class AsapEnvironmentTwoPlayer(gym.Env[dict, int]):
 
     def reset(self, *, seed=None, options=None) -> tuple[ObsType, dict[str, Any]]:
         self.action_index = 0
-        return self._make_observation()
+        return self.make_observation()
 
 
-    def _make_observation(self) -> dict:
+    def make_observation(self) -> dict:
         team_left_state = self.game.team_states[self.team_left]
         team_right_last_state = self.game.last_team_states[self.team_right]
 
@@ -88,13 +91,13 @@ class AsapEnvironmentTwoPlayer(gym.Env[dict, int]):
 
     def _make_food_observation(self, food: Food) -> int:
         if food is not None:
-            return self._food_observation_map[type(food)]
+            return self.food_observation_map[type(food)]
         else:
             return 0
 
 
     def _make_pet_observation(self, pet: Pet) -> list[int]:
         if pet is not None:
-            return [pet.attack, pet.health, pet.exp, pet.level, self._pet_observation_map[type(pet)]]
+            return [pet.attack, pet.health, pet.exp, pet.level, self.pet_observation_map[type(pet)]]
         else:
             return [0, 0, 0, 0, 0]
