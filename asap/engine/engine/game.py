@@ -116,7 +116,7 @@ class Game:
         elif isinstance(action, ActionMergePets):
             return validate_merge_pets(action, self.team_states[team], self.settings.max_pet_level)
         elif isinstance(action, ActionBuyAndMergePet):
-            return validate_buy_and_merge_pet(action, self.team_states[team])
+            return validate_buy_and_merge_pet(action, self.team_states[team], self.settings.max_pet_level)
         elif isinstance(action, ActionSwapPets):
             return validate_swap_pets(action, self.team_states[team])
         elif isinstance(action, ActionEndTurn):
@@ -137,8 +137,6 @@ class Game:
                     self.team_states[result.team].health -= 1
                 self.team_states[result.team].previous_battle_outcome = result.result
             self.capture_last_team_states()
-
-        self._prune_teams()
 
     def _make_pairings(self):
         teams = self.teams[:]

@@ -1,6 +1,8 @@
 import numpy as np
+from sympy.physics.units import action
 
-from asap.engine.actions import ActionRefreshShop
+from asap.engine.actions import ActionRefreshShop, ActionBuyAndPlacePet, ActionFreezePet, ActionSellPet, ActionSwapPets, \
+    ActionBuyFood
 from asap.environment.action_masker import mask_fn
 from asap.environment.action_space import make_action_space, make_possible_actions
 from asap.environment.environment import AsapEnvironmentTwoPlayer
@@ -73,4 +75,41 @@ def test_action_mask(game_turn_1_2_teams):
         *[0]*(food_shop_size * team_size)  # can't apply foods to no pets
     ], dtype=int)
 
-    assert np.all(action_mask == exp)
+    assert np.all(exp == action_mask)
+
+    env.step(env.action_map_inverse[ActionBuyAndPlacePet(0, 0)])
+
+    action_mask = mask_fn(env)
+    invalid_actions = [
+        # can't freeze pet after bought
+        ActionFreezePet(0),
+        # can't unfreeze pet after bought
+        ActionFreezePet(0),
+        # can't put a pet in position 0
+        ActionBuyAndPlacePet(1, 0),
+        ActionBuyAndPlacePet(2, 0),
+        # can't rebuy bought pet
+        ActionBuyAndPlacePet(0, 1),
+    ]
+
+    for invalid_action in invalid_actions:
+        assert action_mask[env.action_map_inverse[invalid_action]] == 0
+
+    valid_actions = [
+        # can sell pet after bought
+        ActionSellPet(0),
+        # can swap pet after bought
+        ActionSwapPets(0, 1),
+        ActionSwapPets(0, 2),
+        ActionSwapPets(0, 3),
+        ActionSwapPets(0, 4),
+        ActionSwapPets(4, 0),
+        ActionSwapPets(3, 0),
+        ActionSwapPets(2, 0),
+        ActionSwapPets(1, 0),
+        # can give pet food
+        ActionBuyFood(0, 0),
+    ]
+
+    for valid_action in valid_actions:
+        assert action_mask[env.action_map_inverse[valid_action]] == 1

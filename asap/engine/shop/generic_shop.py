@@ -32,7 +32,7 @@ class GenericShop(Generic[ItemType]):
         return self._items[index].price
 
     def already_bought(self, index: int) -> bool:
-        return self._items[index] is None
+        return self._items.get(index) is None
 
     def refresh(self, turn: int):
         item_pool = self.shop_pool(turn)
