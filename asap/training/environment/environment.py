@@ -10,16 +10,17 @@ from asap.engine.engine.game import Game
 from asap.engine.engine.game_settings import GameSettings
 from asap.engine.foods import Food
 from asap.engine.pets import Pet
-from asap.engine.shop.item import PetItem, FoodItem
-from asap.environment.action_masker import mask_fn
-from asap.environment.action_space import make_possible_actions, make_action_space
-from asap.environment.observation_space import make_pet_observation_map, make_food_observation_map, \
+from asap.training.environment.action_masker import mask_fn
+from asap.training.environment.action_space import make_possible_actions, make_action_space
+from asap.training.environment.observation_space import make_pet_observation_map, make_food_observation_map, \
     make_flat_observation_space, make_observation_space
+
+from asap.training.adversary import AdversaryLoader
 
 
 class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
 
-    def __init__(self, game_settings: GameSettings, make_adversary_callback: Callable[[], MaskablePPO]):
+    def __init__(self, game_settings: GameSettings):
         super(AsapEnvironmentTwoPlayer, self).__init__()
 
         if game_settings.num_teams != 2:
@@ -37,7 +38,7 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
         self.action_space = make_action_space(game_settings)
 
         self.game_settings = game_settings
-        self.make_adversary = make_adversary_callback
+        self.adversary_loader: AdversaryLoader = None
 
         self.is_adversary_playing = False
         self.action_index: int = 0
@@ -59,22 +60,28 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
             self.game.execute_action(ActionEndTurn(), self.team_left)
             if not self.is_adversary_playing:
                 self.play_adversary_turn()
-            self.game.play_battle_round()
+                self.game.play_battle_round()
+                print(self.game)
         else:
             self.game.execute_action(self.action_map[action], self.team_left)
             self.action_index += 1
 
         obs = self.make_observation()
 
-        self.game._prune_teams()
+        if action == self.action_map_inverse[ActionEndTurn()] and not self.is_adversary_playing:
+            self.game._prune_teams()
 
-        if self.game.has_winner():
-            if self.game.is_winner(self.team_left):
-                reward = 1
-            else:
-                reward = -1
-            print(reward)
-            terminated = True
+            if self.game.is_over():
+                terminated = True
+                if self.game.has_winner():
+                    if self.game.is_winner(self.team_left):
+                        reward = 1
+                    else:
+                        reward = -1
+                else:
+                    reward = 0
+
+                print(reward)
 
         return obs, reward, terminated, truncated, {}
 
@@ -82,13 +89,13 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
         self.team_left = self.game.teams[1]
         self.team_right = self.game.teams[0]
         self.is_adversary_playing = True
+        self.action_index = 0
 
+        action = None
         observation = self.make_observation()
-        action, _ = self.adversary.predict(observation, action_masks=self.mask_fn(self))
-
         while action != self.action_map_inverse[ActionEndTurn()]:
-            observation, _, _, _, _ = self.step(action)
             action, _ = self.adversary.predict(observation, action_masks=self.mask_fn(self))
+            observation, _, _, _, _ = self.step(action)
 
         self.team_left = self.game.teams[0]
         self.team_right = self.game.teams[1]
@@ -97,7 +104,10 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
     def reset(self, *, seed=None, options=None) -> tuple[ObsType, dict[str, Any]]:
         self.game: Game = Game(self.game_settings)
         self.action_index: int = 0
-        self.adversary: MaskablePPO = self.make_adversary()
+        if self.adversary_loader is None:
+            raise EnvironmentError(f"Couldn't find an adversary loader. Please load one using the `set_adverary_loader` method.")
+        else:
+            self.adversary: MaskablePPO = self.adversary_loader.make_adversary()
         self.team_left = self.game.teams[0]
         self.team_right = self.game.teams[1]
 
@@ -131,6 +141,7 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
             ],
             "money": team_left_state.money,
             "turn": team_left_state.shop.turn,
+            "action_index": self.action_index
         }
 
         obs = flatten(self._unflattened_observation_space, obs)
@@ -173,3 +184,6 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
                 "food": self._make_food_observation(None),
                 "price": 0
             }
+
+    def set_adversary_loader(self, adversary_loader: AdversaryLoader):
+        self.adversary_loader = adversary_loader

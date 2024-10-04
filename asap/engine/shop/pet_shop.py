@@ -13,6 +13,24 @@ class PetShop(GenericShop[Pet]):
     def __init__(self, settings: SettingsPetShop, turn: int):
         super().__init__()
         self._settings: SettingsPetShop = settings
+
+        self.turn_pet_shop_size_unlock_mapping = {
+            1: self.settings.TIER_1_PET_SHOP_SIZE,
+            3: self.settings.TIER_2_PET_SHOP_SIZE,
+            5: self.settings.TIER_3_PET_SHOP_SIZE,
+            7: self.settings.TIER_4_PET_SHOP_SIZE,
+            9: self.settings.TIER_5_PET_SHOP_SIZE,
+            11: self.settings.TIER_6_PET_SHOP_SIZE
+        }
+        self.turn_pets_unlock_mapping = {
+            1: self.settings.TIER_1_PETS,
+            3: self.settings.TIER_2_PETS,
+            5: self.settings.TIER_3_PETS,
+            7: self.settings.TIER_4_PETS,
+            9: self.settings.TIER_5_PETS,
+            11: self.settings.TIER_6_PETS
+        }
+
         self._items: PetItemsDict = \
             {i: None for i in range(self.shop_size(turn))}
 
@@ -23,41 +41,19 @@ class PetShop(GenericShop[Pet]):
     def roll_new_item(self, item_pool: List[Type[Pet]]) -> PetItem:
         return PetItem(item=choice(item_pool)(), price=self.settings.PRICE_BUY_PET)
 
+    @lru_cache(maxsize=None)
     def shop_size(self, turn: int) -> int:
-        if turn < 3:
-            return self.settings.TIER_1_PET_SHOP_SIZE
-        elif turn < 5:
-            return self.settings.TIER_2_PET_SHOP_SIZE
-        elif turn < 7:
-            return self.settings.TIER_3_PET_SHOP_SIZE
-        elif turn < 9:
-            return self.settings.TIER_4_PET_SHOP_SIZE
-        elif turn < 11:
-            return self.settings.TIER_5_PET_SHOP_SIZE
-        else:
-            return self.settings.TIER_6_PET_SHOP_SIZE
+        for turn_to_unlock in reversed(self.turn_pet_shop_size_unlock_mapping.keys()):
+            if turn >= turn_to_unlock:
+                return self.turn_pet_shop_size_unlock_mapping[turn_to_unlock]
 
     @lru_cache(maxsize=None)
     def shop_pool(self, turn: int, exclusive: bool = False) -> List[Type[Pet]]:
         pet_pool = []
-        if turn >= 1:
-            if exclusive: pet_pool = []
-            pet_pool.extend(self.settings.TIER_1_PETS)
-        if turn >= 3:
-            if exclusive: pet_pool = []
-            pet_pool.extend(self.settings.TIER_2_PETS)
-        if turn >= 5:
-            if exclusive: pet_pool = []
-            pet_pool.extend(self.settings.TIER_3_PETS)
-        if turn >= 7:
-            if exclusive: pet_pool = []
-            pet_pool.extend(self.settings.TIER_4_PETS)
-        if turn >= 9:
-            if exclusive: pet_pool = []
-            pet_pool.extend(self.settings.TIER_5_PETS)
-        if turn >= 11:
-            if exclusive: pet_pool = []
-            pet_pool.extend(self.settings.TIER_6_PETS)
+        for turn_to_unlock in self.turn_pets_unlock_mapping.keys():
+            if turn >= turn_to_unlock:
+                if exclusive: pet_pool = []
+                pet_pool.extend(self.turn_pets_unlock_mapping[turn_to_unlock])
 
         return pet_pool
 

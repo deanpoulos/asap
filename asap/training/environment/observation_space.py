@@ -4,6 +4,7 @@ from gymnasium.spaces import Dict, Tuple, Box, Discrete, Space, flatten_space
 from asap.engine.engine.game_settings import GameSettings
 from asap.engine.foods.tokens.bread_crumbs import BreadCrumbs
 from asap.engine.pets.pet import MAX_ATTACK, MAX_HEALTH, LEVEL_3_EXP
+from asap.training.environment.action_masker import MAX_ACTIONS_PER_TURN
 
 
 def make_observation_space(game_settings: GameSettings) -> Dict:
@@ -55,6 +56,11 @@ def make_observation_space(game_settings: GameSettings) -> Dict:
             high=np.array([max_turn], dtype=np.int64),
             dtype=np.int64
         ),
+        "action_index": Box(
+            low=np.array([0], dtype=np.int64),
+            high=np.array([MAX_ACTIONS_PER_TURN], dtype=np.int64),
+            dtype=np.int64
+        )
     })
 
 

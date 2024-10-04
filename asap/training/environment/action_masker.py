@@ -2,13 +2,13 @@ import numpy as np
 
 from asap.engine.actions import ActionEndTurn
 
-MAX_ACTIONS_PER_TURN = 30
+MAX_ACTIONS_PER_TURN = 5
 
 
 def mask_fn(env) -> np.ndarray:
     action_mask = np.zeros(len(env.action_map), dtype=int)
 
-    if env.action_index >= MAX_ACTIONS_PER_TURN:
+    if env.action_index >= MAX_ACTIONS_PER_TURN-1:
         action_mask[env.action_map_inverse[ActionEndTurn()]] = 1
 
     else:

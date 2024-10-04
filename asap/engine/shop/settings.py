@@ -49,7 +49,7 @@ class SettingsPetShop:
     TIER_6_PETS: Optional[List[Type[Pet]]] = field(default_factory=lambda: TIER_6_PETS)
 
     def all_pets(self) -> List[Type[Pet]]:
-        return TIER_1_PETS + TIER_2_PETS + TIER_3_PETS + TIER_4_PETS + TIER_5_PETS +  TIER_6_PETS
+        return self.TIER_1_PETS + self.TIER_2_PETS + self.TIER_3_PETS + self.TIER_4_PETS + self.TIER_5_PETS +  self.TIER_6_PETS
 
     def num_possible_pets(self) -> int:
         return len(self.all_pets())
@@ -70,7 +70,7 @@ class SettingsFoodShop:
     TIER_1_FOODS: Optional[List[Type[Food]]] = field(default_factory=lambda: TIER_1_FOODS)
 
     def all_foods(self) -> List[Type[Food]]:
-        return TIER_1_FOODS
+        return self.TIER_1_FOODS
 
     def num_possible_foods(self) -> int:
         return len(self.all_foods())

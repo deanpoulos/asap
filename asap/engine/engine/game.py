@@ -147,6 +147,11 @@ class Game:
 
         return [teams[i:i + 2] for i in range(0, len(teams), 2)]
 
+
+    def is_over(self):
+        print(f"turn: {self.team_states[self.teams[0]].shop.turn}")
+        return self.team_states[self.teams[0]].shop.turn > self.settings.max_turn or self.has_winner()
+
     def has_winner(self):
         if len(self.teams) == 1:
             return True
@@ -162,3 +167,12 @@ class Game:
             if team_state.health <= 0:
                 self.teams.remove(team)
                 self.team_states.pop(team)
+
+    def __str__(self):
+        s = ""
+        for team in self.teams:
+            s += f"Team {team}\n"
+            # s += str(self.team_states[team])
+            # s += f"\n"
+
+        return s
