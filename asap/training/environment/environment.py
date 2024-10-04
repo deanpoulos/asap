@@ -9,17 +9,17 @@ from asap.engine.actions import ActionEndTurn, Action
 from asap.engine.engine.game import Game
 from asap.engine.engine.game_settings import GameSettings
 from asap.engine.foods import Food
+from asap.engine.perks import Perk
 from asap.engine.pets import Pet
 from asap.training.environment.action_masker import mask_fn
 from asap.training.environment.action_space import make_possible_actions, make_action_space
 from asap.training.environment.observation_space import make_pet_observation_map, make_food_observation_map, \
-    make_flat_observation_space, make_observation_space
+    make_flat_observation_space, make_observation_space, make_perk_observation_map
 
 from asap.training.adversary import AdversaryLoader
 
 
 class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
-
     def __init__(self, game_settings: GameSettings):
         super(AsapEnvironmentTwoPlayer, self).__init__()
 
@@ -44,6 +44,7 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
         self.action_index: int = 0
 
         self.pet_observation_map: Dict[Type[Pet], int] = make_pet_observation_map(game_settings)
+        self.perk_observation_map: Dict[Type[Perk], int] = make_perk_observation_map(game_settings)
         self.food_observation_map: Dict[Type[Food], int] = make_food_observation_map(game_settings)
         self.action_map: List[Action] = make_possible_actions(game_settings)
         self.action_map_inverse: Dict[Action, int] = {action: i for i, action in enumerate(make_possible_actions(game_settings))}
@@ -58,10 +59,12 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
 
         if action == self.action_map_inverse[ActionEndTurn()]:
             self.game.execute_action(ActionEndTurn(), self.team_left)
+            self.action_index = 0
             if not self.is_adversary_playing:
-                self.play_adversary_turn()
+                if self.adversary is not None:
+                    self.play_adversary_turn()
                 self.game.play_battle_round()
-                print(self.game)
+                # print(self.game)
         else:
             self.game.execute_action(self.action_map[action], self.team_left)
             self.action_index += 1
@@ -80,8 +83,6 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
                         reward = -1
                 else:
                     reward = 0
-
-                print(reward)
 
         return obs, reward, terminated, truncated, {}
 
@@ -104,9 +105,7 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
     def reset(self, *, seed=None, options=None) -> tuple[ObsType, dict[str, Any]]:
         self.game: Game = Game(self.game_settings)
         self.action_index: int = 0
-        if self.adversary_loader is None:
-            raise EnvironmentError(f"Couldn't find an adversary loader. Please load one using the `set_adverary_loader` method.")
-        else:
+        if self.adversary_loader is not None:
             self.adversary: MaskablePPO = self.adversary_loader.make_adversary()
         self.team_left = self.game.teams[0]
         self.team_right = self.game.teams[1]
@@ -144,6 +143,7 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
             "action_index": self.action_index
         }
 
+        # print(obs)
         obs = flatten(self._unflattened_observation_space, obs)
 
         return obs
@@ -157,9 +157,10 @@ class AsapEnvironmentTwoPlayer(gym.Env[Box, int]):
 
     def _make_pet_observation(self, pet: Pet) -> list[int]:
         if pet is not None:
-            return [[pet.attack, pet.health, pet.exp, pet.level], self.pet_observation_map[type(pet)]]
+            return [[pet.attack, pet.health, pet.exp, pet.level],
+                    self.pet_observation_map[type(pet)], self.perk_observation_map[type(pet.perk)]]
         else:
-            return [[0, 0, 0, 0], 0]
+            return [[0, 0, 0, 0], self.pet_observation_map[type(pet)], 0]
 
     def _make_pet_item_observation(self, item):
         if item is not None:

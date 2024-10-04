@@ -27,7 +27,7 @@ class GameUI(tk.Tk):
         self.update_display()
 
     def create_background(self):
-        with pkg_resources.path(asap.ui.img.backgrounds, 'Secret_Base.png') as bg_image_path:
+        with pkg_resources.path(asap.engine.ui.img.backgrounds, 'Secret_Base.png') as bg_image_path:
             bg_image = Image.open(bg_image_path)
             bg_image = bg_image.resize((1500, 1200), Image.Resampling.LANCZOS)
             self.bg_image = ImageTk.PhotoImage(bg_image)

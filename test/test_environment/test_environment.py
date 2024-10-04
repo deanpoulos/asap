@@ -1,11 +1,10 @@
 import numpy as np
-from sympy.physics.units import action
 
 from asap.engine.actions import ActionRefreshShop, ActionBuyAndPlacePet, ActionFreezePet, ActionSellPet, ActionSwapPets, \
     ActionBuyFood
-from asap.environment.action_masker import mask_fn
-from asap.environment.action_space import make_action_space, make_possible_actions
-from asap.environment.environment import AsapEnvironmentTwoPlayer
+from asap.training.environment.action_masker import mask_fn
+from asap.training.environment.action_space import make_possible_actions
+from asap.training.environment.environment import AsapEnvironmentTwoPlayer
 
 
 def test_environment_init(game_turn_1_2_teams):

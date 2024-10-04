@@ -149,7 +149,6 @@ class Game:
 
 
     def is_over(self):
-        print(f"turn: {self.team_states[self.teams[0]].shop.turn}")
         return self.team_states[self.teams[0]].shop.turn > self.settings.max_turn or self.has_winner()
 
     def has_winner(self):

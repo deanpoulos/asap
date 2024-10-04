@@ -1,7 +1,10 @@
+from types import NoneType
+
 import numpy as np
 from gymnasium.spaces import Dict, Tuple, Box, Discrete, Space, flatten_space
 
 from asap.engine.engine.game_settings import GameSettings
+from asap.engine.foods.tier1.honey import HoneyPerk
 from asap.engine.foods.tokens.bread_crumbs import BreadCrumbs
 from asap.engine.pets.pet import MAX_ATTACK, MAX_HEALTH, LEVEL_3_EXP
 from asap.training.environment.action_masker import MAX_ACTIONS_PER_TURN
@@ -13,7 +16,8 @@ def make_observation_space(game_settings: GameSettings) -> Dict:
         max_health=MAX_HEALTH,
         max_exp=LEVEL_3_EXP,
         max_level=game_settings.max_pet_level,
-        num_pet_abilities=game_settings.settings_pet_shop.num_possible_pets()
+        num_pet_types=len(_all_pets(game_settings)),
+        num_perk_types=len(_all_perks(game_settings))
     )
 
     food_observation_space = make_food_observation_space(len(_all_foods(game_settings)))
@@ -68,8 +72,11 @@ def make_flat_observation_space(game_settings: GameSettings):
     return flatten_space(make_observation_space(game_settings))
 
 
-def make_pet_observation_space(max_health: int, max_attack: int, max_exp: int, max_level: int, num_pet_abilities: int) -> Tuple:
-    ability_observation_space = Discrete(num_pet_abilities)
+def make_pet_observation_space(max_health: int, max_attack: int, max_exp: int, max_level: int, num_pet_types: int, num_perk_types) -> Tuple:
+    # pet_type = Discrete(num_pet_types)
+    # perk_type = Discrete(num_perk_types)
+    pet_type = Box(low=np.array([0]), high=np.array([num_pet_types]), dtype=np.int64)
+    perk_type = Box(low=np.array([0]), high=np.array([num_perk_types]), dtype=np.int64)
 
     return Tuple((
         Box(
@@ -77,7 +84,8 @@ def make_pet_observation_space(max_health: int, max_attack: int, max_exp: int, m
             high=np.array([max_attack, max_health, max_exp, max_level], dtype=np.int64),
             dtype=np.int64,
         ),
-        ability_observation_space
+        pet_type,
+        perk_type
     ))
 
 
@@ -100,8 +108,9 @@ def make_pet_item_observation_space(pet_observation_space: Space, max_price: int
     return Dict({"pet": pet_observation_space, "price": Box(low=0, high=max_price, dtype=np.int64)})
 
 
-def make_food_observation_space(num_foods: int) -> Discrete:
-    return Discrete(num_foods)
+def make_food_observation_space(num_foods: int) -> Box:
+    # return = Discrete(num_foods)
+    return Box(low=np.array([0]), high=np.array([num_foods]), dtype=np.int64)
 
 
 def make_food_item_observation_space(food_observation_space: Space, max_price: int) -> Dict:
@@ -114,7 +123,14 @@ def make_shop_observation_space(item_observation_space: Space, num_items_per_sho
 
 def make_pet_observation_map(game_settings: GameSettings) -> dict:
     return {
-        ability: i for i, ability in enumerate(game_settings.settings_pet_shop.all_pets())
+        ability: i for i, ability in enumerate(_all_pets(game_settings))
+    }
+
+def make_perk_observation_map(game_settings: GameSettings) -> dict:
+    return {
+        ability: i for i, ability in enumerate(
+            _all_perks(game_settings)
+        )
     }
 
 def make_food_observation_map(game_settings: GameSettings) -> dict:
@@ -124,5 +140,11 @@ def make_food_observation_map(game_settings: GameSettings) -> dict:
         )
     }
 
+def _all_pets(game_settings: GameSettings):
+    return [NoneType] + game_settings.settings_pet_shop.all_pets()
+
 def _all_foods(game_settings: GameSettings):
     return game_settings.settings_food_shop.all_foods() + [BreadCrumbs]
+
+def _all_perks(game_settings: GameSettings):
+    return [NoneType, HoneyPerk]
