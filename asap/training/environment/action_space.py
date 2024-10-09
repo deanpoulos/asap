@@ -21,6 +21,9 @@ def make_possible_actions(game_settings: GameSettings):
         make_food_shop_team_actions(game_settings.settings_food_shop.MAX_ITEMS, game_settings.max_team_size)
     )
 
+def make_possible_actions_inverse_mapping(game_settings: GameSettings):
+    return {action: i for i, action in enumerate(make_possible_actions(game_settings))}
+
 def make_fixed_actions_mapping():
     return [
         ActionRefreshShop(),

@@ -10,7 +10,7 @@ from asap.engine.pets.pet import MAX_ATTACK, MAX_HEALTH, LEVEL_3_EXP
 from asap.training.environment.action_masker import MAX_ACTIONS_PER_TURN
 
 
-def make_observation_space(game_settings: GameSettings) -> Dict:
+def make_observation_space(game_settings: GameSettings, observe_opponent_after_battle: bool = True) -> Dict:
     pet_observation_space = make_pet_observation_space(
         max_attack=MAX_ATTACK,
         max_health=MAX_HEALTH,
@@ -45,11 +45,15 @@ def make_observation_space(game_settings: GameSettings) -> Dict:
     max_money = game_settings.max_money
     max_turn = game_settings.max_turn
 
-    return Dict({
-        "team_left": team_observation_space,
-        "team_right": team_observation_space,
-        "pet_shop": pet_shop_observation_space,
-        "food_shop": food_shop_observation_space,
+    opponent_observation = {}
+    if observe_opponent_after_battle:
+        opponent_observation = {f"team_right_{key}": value for key, value in team_observation_space.spaces.items()}
+
+    observation_space = Dict({
+        **{f"team_left_{key}": value for key, value in team_observation_space.spaces.items()},
+        **opponent_observation,
+        **{f"pet_shop_{i}": value for i, value in enumerate(pet_shop_observation_space.spaces)},
+        **{f"food_shop_{i}": value for i, value in enumerate(food_shop_observation_space.spaces)},
         "money": Box(
             low=np.array([0], dtype=np.int64),
             high=np.array([max_money], dtype=np.int64),
@@ -67,16 +71,22 @@ def make_observation_space(game_settings: GameSettings) -> Dict:
         )
     })
 
+    return observation_space
 
-def make_flat_observation_space(game_settings: GameSettings):
-    return flatten_space(make_observation_space(game_settings))
+def make_flat_observation_space(game_settings: GameSettings, observe_opponent_after_battle: bool = True) -> Dict:
+    observation_space = make_observation_space(game_settings, observe_opponent_after_battle)
+    for key, subspace in observation_space.spaces.items():
+        if isinstance(subspace, (Tuple, Dict)):
+            observation_space.spaces[key] = flatten_space(subspace)
+
+    return observation_space
 
 
 def make_pet_observation_space(max_health: int, max_attack: int, max_exp: int, max_level: int, num_pet_types: int, num_perk_types) -> Tuple:
-    # pet_type = Discrete(num_pet_types)
-    # perk_type = Discrete(num_perk_types)
-    pet_type = Box(low=np.array([0]), high=np.array([num_pet_types]), dtype=np.int64)
-    perk_type = Box(low=np.array([0]), high=np.array([num_perk_types]), dtype=np.int64)
+    pet_type = Discrete(num_pet_types)
+    perk_type = Discrete(num_perk_types)
+    # pet_type = Box(low=np.array([0]), high=np.array([num_pet_types]), dtype=np.int64)
+    # perk_type = Box(low=np.array([0]), high=np.array([num_perk_types]), dtype=np.int64)
 
     return Tuple((
         Box(
@@ -95,7 +105,7 @@ def make_team_observation_space(
     max_num_pets_per_team: int,
 ) -> Dict:
     return Dict({
-        "pets": Tuple([pet_observation_space for _ in range(max_num_pets_per_team)]),
+        **{f"pet_{i}": pet_observation_space for i in range(max_num_pets_per_team)},
         "health": Box(
             low=np.array([0], dtype=np.int64),
             high=np.array([max_starting_team_health], dtype=np.int64),
@@ -104,17 +114,18 @@ def make_team_observation_space(
     })
 
 
-def make_pet_item_observation_space(pet_observation_space: Space, max_price: int) -> Dict:
-    return Dict({"pet": pet_observation_space, "price": Box(low=0, high=max_price, dtype=np.int64)})
+def make_pet_item_observation_space(pet_observation_space: Space, max_price: int) -> Tuple:
+    price_observation_space = Box(low=0, high=max_price, dtype=np.int64)
+    return Tuple([pet_observation_space, price_observation_space])
 
 
-def make_food_observation_space(num_foods: int) -> Box:
-    # return = Discrete(num_foods)
-    return Box(low=np.array([0]), high=np.array([num_foods]), dtype=np.int64)
+def make_food_observation_space(num_foods: int) -> Discrete:
+    return Discrete(num_foods)
 
 
-def make_food_item_observation_space(food_observation_space: Space, max_price: int) -> Dict:
-    return Dict({"food": food_observation_space, "price": Box(low=0, high=max_price, dtype=np.int64)})
+def make_food_item_observation_space(food_observation_space: Space, max_price: int) -> Tuple:
+    price_observation_space = Box(low=0, high=max_price, dtype=np.int64)
+    return Tuple([food_observation_space, price_observation_space])
 
 
 def make_shop_observation_space(item_observation_space: Space, num_items_per_shop: int) -> Tuple:
@@ -146,5 +157,5 @@ def _all_pets(game_settings: GameSettings):
 def _all_foods(game_settings: GameSettings):
     return game_settings.settings_food_shop.all_foods() + [BreadCrumbs]
 
-def _all_perks(game_settings: GameSettings):
+def _all_perks(_: GameSettings):
     return [NoneType, HoneyPerk]

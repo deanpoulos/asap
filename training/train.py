@@ -2,65 +2,105 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from stable_baselines3.common.callbacks import EvalCallback
-
-from sb3_contrib.common.maskable.policies import MaskableActorCriticPolicy
+from sb3_contrib.common.maskable.policies import MaskableMultiInputActorCriticPolicy, MaskableActorCriticPolicy
+from sb3_contrib.common.maskable.callbacks import MaskableEvalCallback
 from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 
 from asap.training.environment.environment import AsapEnvironmentTwoPlayer
-from asap.training.scenarios.mosquito_upgrade_to_superduck_scenario import mosquito_to_superduck_game_settings
+from asap.training.opponents.self_play.adversary_loader import OpponentSaverLoaderBestOrRandom, OpponentLoaderBest
+from asap.training.opponents.self_play.adversary_self_play import OpponentSelfPlay
+from asap.training.scenarios.mosquito_upgrade_to_superduck_scenario.settings import mosquito_to_superduck_game_settings
 
-from asap.training.adversary import AdversaryLoader
-from asap.training.callbacks import CustomTensorboardCallback
+from asap.training.callbacks import LogTeamAttackCallback, HyperParameterDictionarySaverCallback, \
+    SaveModelRolloutEndCallback, DeleteModelFromCacheCallback
 
-log_dir = 'logs'
-load_dir = save_dir = Path('runs') / datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-tmp_dir = Path('/tmp')
+# Define IO directories
+date_time_path = datetime.now().strftime("%Y-%m-%d"),  datetime.now().strftime("%H-%M-%S")
+tensorboard_log_dir = Path('logs') / date_time_path[0] / date_time_path[1]
+save_dir = Path('runs') / date_time_path[0] / date_time_path[1]
 os.makedirs(save_dir, exist_ok=True)
 
-def make_env():
-    env = AsapEnvironmentTwoPlayer(mosquito_to_superduck_game_settings)
-    env = ActionMasker(env, env.mask_fn)
-    return env
+# Set hyperparameters
+training_opponent_hparams = {
+    "probability_to_load_random_model":  0.2,
+    "path_to_initial_best_model": "/media/dean/Dean's PC Extension Drive/Training Data/Asap/runs/2024-10-07/21-32-14/best_model.zip"
+}
+eval_hparams = {
+    "n_eval_episodes": 20,
+    "eval_freq": 400,
+}
+eval_opponent_hparams = {
+    "probability_to_load_random_model": 0.0,
+}
+env_hparams = {
+    "use_flat_observations": True,
+    "observe_opponent_after_battle": False
+}
+model_hparams = {
+    "n_steps": 10,
+    "batch_size": 4,
+    "gae_lambda": 0.95,
+    "ent_coef": 0.0,
+    "gamma": 0.99,
+    "learning_rate": 3e-4,
+}
+training_hparams = {
+    "total_timesteps": int(1e6)
+}
 
-env = make_env()
+# Make the environment
+saver_callback = SaveModelRolloutEndCallback(save_dir)
+team_attack_callback = LogTeamAttackCallback()
+opponent_loader = OpponentSaverLoaderBestOrRandom(MaskablePPO, saver_callback, **training_opponent_hparams)
+opponent = OpponentSelfPlay(loader=opponent_loader)
 
-model = MaskablePPO(
-    MaskableActorCriticPolicy,
-    env,
-    n_steps=10,
-    batch_size=4,
-    ent_coef=0.,
-    verbose=0,
-    device='cuda',
-    learning_rate=3e-4,
-    tensorboard_log=log_dir
-)
+env = AsapEnvironmentTwoPlayer(mosquito_to_superduck_game_settings, opponent, **env_hparams, verbose=0)
+env = ActionMasker(env, env.mask_fn)
 
-adversary_loader = AdversaryLoader(model, load_dir, save_dir, probability_to_load_random_model=0.2)
-env.set_adversary_loader(adversary_loader)
-env.adversary_loader.callback.save()
 
-eval_env = make_env()
-eval_adversary_loader = AdversaryLoader(model, load_dir, tmp_dir, probability_to_load_random_model=1)
-eval_env.set_adversary_loader(eval_adversary_loader)
-eval_env.adversary_loader.callback.save()
-eval_env.reset()
+# Make the model
+args = {
+    **model_hparams,
+    "verbose": 0,
+    "device": 'cuda',
+    "tensorboard_log": tensorboard_log_dir
+}
 
-eval_callback = EvalCallback(
-    eval_env,
-    best_model_save_path=save_dir,
-    log_path=log_dir,
-    n_eval_episodes=20,
-    eval_freq=40,
-    deterministic=True,
-    render=False
-)
+if env_hparams["use_flat_observations"]:
+    policy_type = MaskableActorCriticPolicy
+else:
+    policy_type = MaskableMultiInputActorCriticPolicy
 
-team_power_callback = CustomTensorboardCallback(env, model, verbose=1)
+model = MaskablePPO(policy_type, env, **args)
+saver_callback.init_callback(model)
+if not opponent_loader.path_to_initial_best_model:
+    saver_callback.save_as('best_model.zip')  # randomly seed initial best model
 
-model.learn(
-    total_timesteps=1e6,
-    callback=[env.adversary_loader.callback, team_power_callback, eval_callback]
-)
+# Add evaluation to the training process
+eval_opponent_loader = OpponentLoaderBest(MaskablePPO, save_dir)
+eval_opponent = OpponentSelfPlay(loader=opponent_loader)
+# eval_adversary = OptimalMosquitoUpgradeToSuperduckScenarioOpponent(
+#     make_possible_actions_inverse_mapping(mosquito_to_superduck_game_settings)
+# )
+eval_env = AsapEnvironmentTwoPlayer(mosquito_to_superduck_game_settings, eval_opponent, team_attack_callback.on_battle_end, **env_hparams, verbose=1)
+eval_env = ActionMasker(eval_env, eval_env.mask_fn)
+
+# Add other callbacks
+callbacks = [
+    saver_callback,
+    team_attack_callback,
+    MaskableEvalCallback(
+        eval_env,
+        best_model_save_path=save_dir,
+        log_path=tensorboard_log_dir,
+        callback_on_new_best=DeleteModelFromCacheCallback(opponent_loader.opponents, 'best'),
+        **eval_hparams,
+        deterministic=True,
+        render=False
+    ),
+    HyperParameterDictionarySaverCallback({**model_hparams, **training_hparams, **training_opponent_hparams, **eval_hparams, **env_hparams}),
+]
+
+# Learn!
+model.learn(**training_hparams, callback=callbacks)

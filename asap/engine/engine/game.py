@@ -7,7 +7,7 @@ from typing import List, Dict, Optional
 
 from asap.engine.actions import *
 from asap.engine.engine.battle.battle import Battle
-from asap.engine.engine.battle.battle_result import WIN, LOSS
+from asap.engine.engine.battle.battle_result import WIN, LOSS, BattleResult
 from asap.engine.engine.shop.action_processor.process_buy_food import process_buy_food
 from asap.engine.engine.shop.action_processor.process_buy_and_place_pet import process_buy_and_place_pet
 from asap.engine.engine.shop.action_processor.process_buy_and_merge_pet import process_buy_and_merge_pet
@@ -125,11 +125,13 @@ class Game:
             raise NotImplementedError()
 
 
-    def play_battle_round(self):
+    def play_battle_round(self) -> List[BattleResult]:
         pairings = self._make_pairings()
+        all_results = []
         for pairing in pairings:
             battle = Battle(*pairing)
             results = battle.play()
+            all_results.append(results)
             for result in results:
                 if result.result == WIN:
                     self.team_states[result.team].wins += 1
@@ -137,6 +139,8 @@ class Game:
                     self.team_states[result.team].health -= 1
                 self.team_states[result.team].previous_battle_outcome = result.result
             self.capture_last_team_states()
+
+        return all_results
 
     def _make_pairings(self):
         teams = self.teams[:]
@@ -149,16 +153,30 @@ class Game:
 
 
     def is_over(self):
-        return self.team_states[self.teams[0]].shop.turn > self.settings.max_turn or self.has_winner()
+        return self.reached_turn_limit() or self.one_team_left()
 
-    def has_winner(self):
+    def reached_turn_limit(self):
+        return any([self.team_states[self.teams[i]].shop.turn > self.settings.max_turn for i in range(len(self.teams))])
+
+    def one_team_left(self):
         if len(self.teams) == 1:
             return True
         else:
             return False
 
     def is_winner(self, team: Team) -> bool:
-        return self.has_winner() and team in self.teams
+        if self.one_team_left():
+            if team in self.teams:
+                return True
+            else:
+                return False
+
+        is_exclusively_healthiest_team_at_turn_limit = all(
+            [self.team_states[team].health > self.team_states[other_team].health
+             for other_team in self.teams if other_team != team])
+
+        if is_exclusively_healthiest_team_at_turn_limit:
+            return True
 
     def _prune_teams(self):
         for team in self.teams:
