@@ -83,9 +83,15 @@ class AsapEnvironmentTwoPlayer(gym.Env[dict, int]):
                 with nvtx.annotate("Env/Battle"):
                     results = self.game.play_battle_round()
                 if results[0].team_l_result.result == TeamBattleResult.Result.WIN:
-                    reward = 0.1
+                    if results[0].team_l_result.team == self.team_left:
+                        reward = 1
+                    else:
+                        reward = -1
                 elif results[0].team_l_result.result == TeamBattleResult.Result.LOSS:
-                    reward = -0.1
+                    if results[0].team_l_result.team == self.team_left:
+                        reward = -1
+                    else:
+                        reward = 1
                 if self.post_battle_callback is not None:
                     self.post_battle_callback(self)
                 if self.verbose > 0:
@@ -103,10 +109,10 @@ class AsapEnvironmentTwoPlayer(gym.Env[dict, int]):
 
             if self.game.is_over():
                 terminated = True
-                if self.game.is_winner(self.team_left):
-                    reward = 1
-                elif self.game.is_winner(self.team_right):
-                    reward = -1
+                # if self.game.is_winner(self.team_left):
+                #     reward = 1
+                # elif self.game.is_winner(self.team_right):
+                #     reward = -1
 
         return obs, reward, terminated, truncated, {}
 

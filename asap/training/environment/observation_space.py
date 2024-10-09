@@ -1,3 +1,8 @@
+import typing
+
+import gymnasium.spaces
+from gymnasium import spaces
+
 from types import NoneType
 
 import numpy as np
@@ -11,6 +16,39 @@ from asap.training.environment.action_masker import MAX_ACTIONS_PER_TURN
 
 
 def make_observation_space(game_settings: GameSettings, observe_opponent_after_battle: bool = True) -> Dict:
+    observation_space = make_full_observation_space(game_settings, observe_opponent_after_battle)
+
+    new_observation_space = gymnasium.spaces.Dict()
+
+    team_observation_space = observation_space.spaces.pop("team_left")
+    new_observation_space.spaces.update(
+        **{f"team_left_{key}": value for key, value in team_observation_space.spaces.items()},
+    )
+
+    if observe_opponent_after_battle:
+        opponent_observation_space = observation_space.spaces.pop("team_right")
+        new_observation_space.spaces.update(
+            **{f"team_right_{key}": value for key, value in opponent_observation_space.spaces.items()}
+        )
+
+    pet_shop_observation_space = observation_space.spaces.pop("pet_shop")
+    new_observation_space.spaces.update(
+        **{f"pet_shop_{i}": value for i, value in enumerate(pet_shop_observation_space.spaces)},
+    )
+
+    food_shop_observation_space = observation_space.spaces.pop("food_shop")
+    new_observation_space.spaces.update(
+        **{f"food_shop_{i}": value for i, value in enumerate(food_shop_observation_space.spaces)},
+    )
+
+    new_observation_space.spaces.update(
+        **observation_space
+    )
+
+    return new_observation_space
+
+
+def make_full_observation_space(game_settings: GameSettings, observe_opponent_after_battle: bool = True) -> Dict:
     pet_observation_space = make_pet_observation_space(
         max_attack=MAX_ATTACK,
         max_health=MAX_HEALTH,
@@ -47,13 +85,13 @@ def make_observation_space(game_settings: GameSettings, observe_opponent_after_b
 
     opponent_observation = {}
     if observe_opponent_after_battle:
-        opponent_observation = {f"team_right_{key}": value for key, value in team_observation_space.spaces.items()}
+        opponent_observation = {"team_right": team_observation_space}
 
     observation_space = Dict({
-        **{f"team_left_{key}": value for key, value in team_observation_space.spaces.items()},
+        "team_left": team_observation_space,
         **opponent_observation,
-        **{f"pet_shop_{i}": value for i, value in enumerate(pet_shop_observation_space.spaces)},
-        **{f"food_shop_{i}": value for i, value in enumerate(food_shop_observation_space.spaces)},
+        "pet_shop": pet_shop_observation_space,
+        "food_shop": food_shop_observation_space,
         "money": Box(
             low=np.array([0], dtype=np.int64),
             high=np.array([max_money], dtype=np.int64),
@@ -159,3 +197,27 @@ def _all_foods(game_settings: GameSettings):
 
 def _all_perks(_: GameSettings):
     return [NoneType, HoneyPerk]
+
+
+def get_observation_dim_names(space: typing.Union[spaces.Dict, spaces.Tuple], base_name: str = 'obs',
+                              dim_names: typing.List[str] = None):
+    if dim_names is None:
+        dim_names = []
+
+    if isinstance(space, spaces.Box):
+        for i in range(space.shape[0]):
+            dim_names.append(f"{base_name}/{i}")
+    elif isinstance(space, spaces.Discrete):
+        for i in range(space.n):
+            dim_names.append(f"{base_name}={i}")
+    elif isinstance(space, spaces.Tuple):
+        for i, space in enumerate(space.spaces):
+            get_observation_dim_names(space, f"{base_name}/{i}", dim_names)
+    elif isinstance(space, spaces.Dict):
+        for name, space in space.items():
+            get_observation_dim_names(space, f"{base_name}/{name}", dim_names)
+
+    else:
+        raise NotImplementedError(f"Expected Box, Discrete, Tuple, Dict, got space type {type(space)}")
+
+    return dim_names

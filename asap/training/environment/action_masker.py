@@ -3,7 +3,7 @@ import nvtx
 
 from asap.engine.actions import ActionEndTurn
 
-MAX_ACTIONS_PER_TURN = 6
+MAX_ACTIONS_PER_TURN = 10
 
 
 @nvtx.annotate("mask actions")

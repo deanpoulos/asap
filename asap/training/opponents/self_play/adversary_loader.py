@@ -30,6 +30,8 @@ class OpponentSaverLoaderBestOrRandom(OpponentLoader):
 
         if self.path_to_initial_best_model is not None:
             self.opponents['best'] = load_model(model_type, path_to_initial_best_model)
+            # save a copy of the best model in the current directory
+            self.opponents['best'].save(self.saver.save_directory / self.saver.model_name('best'))
 
 
     def load(self) -> BaseAlgorithm:

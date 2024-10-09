@@ -24,11 +24,11 @@ os.makedirs(save_dir, exist_ok=True)
 # Set hyperparameters
 training_opponent_hparams = {
     "probability_to_load_random_model":  0.2,
-    "path_to_initial_best_model": "/media/dean/Dean's PC Extension Drive/Training Data/Asap/runs/2024-10-07/21-32-14/best_model.zip"
+    # "path_to_initial_best_model": "/media/dean/Dean's PC Extension Drive/Training Data/Asap/runs/2024-10-07/21-32-14/best_model.zip"
 }
 eval_hparams = {
     "n_eval_episodes": 20,
-    "eval_freq": 400,
+    "eval_freq": 1000,
 }
 eval_opponent_hparams = {
     "probability_to_load_random_model": 0.0,
@@ -38,12 +38,12 @@ env_hparams = {
     "observe_opponent_after_battle": False
 }
 model_hparams = {
-    "n_steps": 10,
-    "batch_size": 4,
+    "n_steps": 2048,
+    "batch_size": 64,
     "gae_lambda": 0.95,
-    "ent_coef": 0.0,
+    "ent_coef": 0.1,
     "gamma": 0.99,
-    "learning_rate": 3e-4,
+    "learning_rate": 1e-4,
 }
 training_hparams = {
     "total_timesteps": int(1e6)
@@ -79,7 +79,7 @@ if not opponent_loader.path_to_initial_best_model:
 
 # Add evaluation to the training process
 eval_opponent_loader = OpponentLoaderBest(MaskablePPO, save_dir)
-eval_opponent = OpponentSelfPlay(loader=opponent_loader)
+eval_opponent = OpponentSelfPlay(loader=eval_opponent_loader)
 # eval_adversary = OptimalMosquitoUpgradeToSuperduckScenarioOpponent(
 #     make_possible_actions_inverse_mapping(mosquito_to_superduck_game_settings)
 # )

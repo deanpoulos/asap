@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Union
 
 from stable_baselines3.common.base_class import BaseAlgorithm
 from stable_baselines3.common.callbacks import  BaseCallback
@@ -27,7 +27,7 @@ class LogTeamAttackCallback(BaseCallback):
 
 class SaveModelRolloutEndCallback(BaseCallback):
     @staticmethod
-    def model_name(index: int):
+    def model_name(index: Union[int, str]):
         return f"{index}_model.zip"
 
     def __init__(self, save_dir: Path, training_model: BaseAlgorithm = None, verbose=0):
@@ -57,10 +57,10 @@ class SaveModelRolloutEndCallback(BaseCallback):
         self.model.save(self.save_directory / self.model_name(self.index))
         self.index += 1
 
-    def save_as(self, model_name: str):
+    def save_as(self, save_name: str):
         if self.model is None:
             raise AttributeError("Training model is not set. Did you call `set_training_model`?")
-        self.model.save(self.save_directory / model_name)
+        self.model.save(self.save_directory / save_name)
 
 class HyperParameterDictionarySaverCallback(BaseCallback):
     def _on_step(self) -> bool:
